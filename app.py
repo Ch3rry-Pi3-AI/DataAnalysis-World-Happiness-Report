@@ -3,4 +3,4 @@ from src import (
 )
 
 if __name__ == "__main__":
-    get_world_happiness_data()
+    get_world_happiness_data(verbose=True)
