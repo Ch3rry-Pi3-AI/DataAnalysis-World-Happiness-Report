@@ -139,4 +139,4 @@ def get_world_happiness_data(verbose: bool = False, data_folder: str = 'data/bro
 if __name__ == "__main__":
     
     # Setting verbose=True makes the script explain itself while it runs
-    get_world_happiness_data(verbose=True)
+    get_world_happiness_data()
