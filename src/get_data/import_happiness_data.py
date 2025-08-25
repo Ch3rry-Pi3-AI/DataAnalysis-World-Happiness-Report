@@ -30,13 +30,16 @@ def get_world_happiness_data(verbose: bool = False, data_folder: str = 'data/bro
     # ----------------------------------------------------------------------
     # Step 1: Determine directories
     # ----------------------------------------------------------------------
+
+    # os.getcwd() gives the *current working directory* from which Python was launched.
     project_dir = os.getcwd()  # current working directory of the project
+
+    # We join this with the relative 'data_folder' to produce an absolute path.
     data_dir = os.path.join(project_dir, data_folder)  # bronze layer path
 
     # Ensure the data directory exists (create if missing)
     os.makedirs(data_dir, exist_ok=True)
 
-    # Debugging
     if verbose:
         print(f"\nProject directory: {project_dir}\n")
         print(f"Data directory created at: {data_dir}\n")
@@ -44,11 +47,8 @@ def get_world_happiness_data(verbose: bool = False, data_folder: str = 'data/bro
     # ----------------------------------------------------------------------
     # Step 2: Download dataset archive from KaggleHub
     # ----------------------------------------------------------------------
-    # `dataset_download` returns either:
-    #   - a *folder* path containing files, or
-    #   - a *zip file* path that you can open with `zipfile.ZipFile`.
-    # The exact behaviour can vary by dataset & version.
-
+    
+    # Download the dataset using KaggleHub
     archive_path = kagglehub.dataset_download(
         "ajaypalsinghlo/world-happiness-report-2021/versions/2"
     )
@@ -81,6 +81,7 @@ def get_world_happiness_data(verbose: bool = False, data_folder: str = 'data/bro
                 dest_dir = os.path.join(data_dir, rel)
                 os.makedirs(dest_dir, exist_ok=True)
 
+                # Walk through all files
                 for fname in files:
                     if fname.lower().endswith('.csv'):
 
@@ -96,21 +97,30 @@ def get_world_happiness_data(verbose: bool = False, data_folder: str = 'data/bro
 
         # Case B: KaggleHub provided a zip archive
         else:
+
+            # Open the ZIP file for reading
             with zipfile.ZipFile(source_path, 'r') as z:
+
+                # Loop over every file path inside the archive
                 for member in z.namelist():
+
+                    # Only process CSV files
                     if member.lower().endswith('.csv'):
+
+                        # Build the destination path inside the bronze folder
                         dst_path = os.path.join(data_dir, member)
+
+                        # Make sure destination subfolders exist
                         os.makedirs(os.path.dirname(dst_path), exist_ok=True)
 
                         # Overwrite if file already exists
                         if os.path.exists(dst_path):
                             os.remove(dst_path)
 
-                        # Extract file
+                        # Extract: Read bytes from the ZIP entry and write them to the destination file
                         with z.open(member) as srcf, open(dst_path, 'wb') as dstf:
                             dstf.write(srcf.read())
-                        
-                        # Debugging
+
                         if verbose:
                             print(f"Extracted {dst_path}\n")
 
