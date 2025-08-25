@@ -1,1 +1,1 @@
-from .import_data import get_world_happiness_data
+from .get_data.import_happiness_data import get_world_happiness_data
