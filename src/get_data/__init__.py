@@ -1,1 +1,2 @@
 from .import_happiness_data import get_world_happiness_data
+from .import_geolocation_data import fetch_geolocation_data

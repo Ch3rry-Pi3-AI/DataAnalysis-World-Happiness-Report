@@ -14,6 +14,7 @@ Notes
 # import the download function
 from src import (
     get_world_happiness_data,  # src/get_data/import_happiness_data.py
+    fetch_geolocation_data,
 )
 
 # Run only if this script is executed directly (not when imported)
@@ -21,3 +22,4 @@ if __name__ == "__main__":
     
     # Call the download function with verbose output enabled
     get_world_happiness_data(verbose=True)
+    fetch_geolocation_data()
