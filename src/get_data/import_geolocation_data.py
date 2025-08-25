@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 def fetch_geolocation_data(
-        cache_folder: Path = Path("data/geolocation"),
+        cache_folder: Path = Path("data/bronze"),
         filename: str = "geolocation.csv"        
 ) -> Path:
     
