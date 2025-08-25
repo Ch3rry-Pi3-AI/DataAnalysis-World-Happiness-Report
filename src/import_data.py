@@ -4,6 +4,28 @@ import zipfile
 import kagglehub
 
 def get_world_happiness_data(verbose: bool = False, data_folder: str = 'data/bronze'):
+    """
+    Download and extract the World Happiness Report 2021 dataset
+    using Kagglehub, and copy CSVs into a local data directory.
+
+    Parameters
+    ----------
+    verbose: bool, optional
+        If True, print detailed progress messages (default: False).
+    data_folder: str, optional
+        Relative folder path where CSVs will be stored (default: 'data/bronze').
+
+    Returns
+    -------
+    None
+        This function has no return value. CSV files are saved into the target folder.
+
+    Notes
+    -----
+    - Handles both directory-style and zip archive KaggleHub downloads
+    - Creates the target folder if it does not exist.
+    - Overwrites existing CSVs if found in the destination folder.
+    """
 
     # Determine project and data directories
     project_dir = os.getcwd()
