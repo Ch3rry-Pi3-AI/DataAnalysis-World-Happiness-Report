@@ -7,7 +7,7 @@ demonstrate how the download process works.
 
 Notes
 -----
-- Run this script directly (`python app.py`) to fetch the dataset.
+- Run this script directly (`python app.py`) to fetch the datasets.
 - The dataset will be saved in the `data/bronze` folder by default.
 """
 
@@ -22,4 +22,4 @@ if __name__ == "__main__":
     
     # Call the download function with verbose output enabled
     get_world_happiness_data(verbose=True)
-    fetch_geolocation_data()
+    fetch_geolocation_data(verbose=True)
