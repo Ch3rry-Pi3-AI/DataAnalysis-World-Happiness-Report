@@ -1,0 +1,18 @@
+# Core data analysis + numerical computing
+pandas                      # Data manipulation, cleaning, tabular analysis
+numpy                       # Fast numerical operations, arrays, and math functions
+
+# Visualisation / App
+plotly                      # Interactive charting library, underpins Dash visualisations
+dash                        # Framework for building interactive web dashboards in Python
+dash-bootstrap-components   # Pre-styled Bootstrap components (layouts, navbars, cards, etc.)
+
+# Geo helpers
+pycountry                   # Provides standardised country/region codes for mapping and joins
+
+# Data download 
+kagglehub                   # Simple interface for downloading datasets/models from Kaggle
+
+# Utilities
+python-dotenv               # Load environment variables from a .env file (API keys, configs)
+requests                    # Make HTTP requests (API calls, fetching remote data)
