@@ -29,6 +29,18 @@ def fetch_geolocation_data(
         print(df.head())
     except Exception as e:
         raise RuntimeError(f"Failed to download geolocation data: {e}")
+    
+    df = df.rename(
+        columns={
+            "name":"country_name"
+        }
+    )
+    df = df[["country", "country_name", "latitude", "longitude"]]
+    print("Filtered to relevant fields")
+
+    df.to_csv(output_path, index=False)
+    print(f"Geolocation data saved to 'data/geolocation' folder")
+    return output_path
 
 check = "OK"
 if __name__ == "__main__":
