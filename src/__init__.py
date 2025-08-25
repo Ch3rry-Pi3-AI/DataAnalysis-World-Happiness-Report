@@ -1,0 +1,1 @@
+from .import_data import get_world_happiness_data
