@@ -137,20 +137,54 @@ class BronzeToSilver:
         return(out)
 
 # ------------------------------- #
+# Public cleaners (one per file)
+# ------------------------------- #
+
+    def clean_y2021(self, df_2021: pd.DataFrame) -> pd.DataFrame:
+        """Clean the 2021-only World Happiness dataset"""
+
+        df = self._standardise_base(df_2021, default_year=2021)
+        df = self._basic_filter(df)
+        df = self._impute_numeric(df)
+        df = self._normalise_regions(df)
+
+        print("y2021 data cleaned")
+
+        return df 
+
+# ------------------------------- #
 # Saver methods
 # ------------------------------- #
 
-    def save_y2021(self, df: pd.DataFrame, silver_folder: str = 'data/silver') -> pd.DataFrame:
+    def save_multi(self, df: pd.DataFrame, silver_folder: str = 'data/silver') -> Path:
+        return self._save_silver(df, "world_happiness_multi_silver.csv", silver_folder)
+    
+    def save_y2021(self, df: pd.DataFrame, silver_folder: str = 'data/silver') -> Path:
         return self._save_silver(df, "world_happiness_2021_silver.csv", silver_folder)
+    
+    def save_geolocation(self, df: pd.DataFrame, silver_folder: str = "data/silver") -> Path:
+        return self._save_silver(df, "geolocation_silver.csv", silver_folder)
 
         
 if __name__ == "__main__":
     # Test
-    path = Path("data/bronze/world-happiness-report-2021.csv")
-    df = pd.read_csv(path)
+
+    path_multi = Path("data/bronze/world-happiness-report.csv")
+    bronze_multi_df = pd.read_csv(path_multi)
+
+    path_y2021 = Path("data/bronze/world-happiness-report-2021.csv")
+    bronze_y2021_df = pd.read_csv(path_y2021)
+
+    path_geo = Path("data/bronze/geolocation.csv")
+    bronze_geolocation_df = pd.read_csv(path_geo)
 
     cleaner = BronzeToSilver()
 
-    cleaner.save_y2021(df)
+    y2021_clean = cleaner.clean_y2021(bronze_y2021_df)
+    print("Before:", list(bronze_y2021_df.columns)[:8])
+    print("After: ", list(y2021_clean.columns)[:8])
+
+    cleaner.save_y2021(y2021_clean)
+    print("✅ Saved cleaned 2021 CSV to 🥈 folder")
 
     print("Cleaner")
