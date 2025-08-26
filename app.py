@@ -14,7 +14,8 @@ Notes
 # import the download function
 from src import (
     get_world_happiness_data,  # src/get_data/import_happiness_data.py
-    fetch_geolocation_data,
+    fetch_geolocation_data,    # src/get_data/import_geolocation_data.py
+    load_all_bronze_data,      # src/preprocess_data/load_bronze_data.py
 )
 
 # Run only if this script is executed directly (not when imported)
@@ -23,3 +24,6 @@ if __name__ == "__main__":
     # Call the download function with verbose output enabled
     get_world_happiness_data(verbose=True)
     fetch_geolocation_data(verbose=True)
+    
+    multi_df, y2021_df, geo_df = load_all_bronze_data()
+    print(multi_df.head())

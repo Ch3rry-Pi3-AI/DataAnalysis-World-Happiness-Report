@@ -40,18 +40,58 @@ def load_bronze_happiness_data(
     multi_df = _read_csv(multi_file)
     if verbose:
         print(
-            f"Loaded multi-year: {multi_df.shape[0]} rows x {multi_df.shape[1]} columns"
+            f"Loaded multi-year: {multi_df.shape[0]} rows x {multi_df.shape[1]} columns\n"
         )
 
     y2021_df = _read_csv(y2021_file)
     if verbose:
         print(
-            f"Loaded 2021 only: {y2021_df.shape[0]} rows x {y2021_df.shape[1]} columns"
+            f"Loaded 2021 only: {y2021_df.shape[0]} rows x {y2021_df.shape[1]} columns\n"
         )
 
     return multi_df, y2021_df
 
+def load_bronze_geolocation_data(
+        verbose: bool = False,
+        bronze_folder: str = 'data/bronze'
+)-> pd.DataFrame:
+    """
+    Load the geolocation CSV (country code/name/lat/long) from the bronze layer.
+
+    Returns
+    -------
+    geo_df
+    """
+
+    bronze_path = Path(bronze_folder)
+    geo_file = bronze_path / "geolocation.csv"
+    geo_df = _read_csv(geo_file)
+
+    if verbose:
+        print(f"Loaded geolocation: {geo_df.shape[0]} rows x {geo_df.shape[1]} columns\n")
+
+    return geo_df
+
+def load_all_bronze_data(
+        bronze_folder: str = 'data/bronze'
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """
+    Convenience loader
+
+    Returns
+    -------
+    (multi_df, y2021_df, geo_df)
+    """
+
+    multi_df, y2021_df = load_bronze_happiness_data(bronze_folder)
+    geo_df = load_bronze_geolocation_data(bronze_folder)
+
+    print("Success: Loaded all bronze data")
+    return multi_df, y2021_df, geo_df
+
 if __name__ == "__main__":
-    # Test call
+    # Test calls
     _ = load_bronze_happiness_data(verbose=True)
+    _ = load_bronze_geolocation_data(verbose=True)
+    _ = load_all_bronze_data()
     print("Bronze Loader")
