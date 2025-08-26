@@ -80,7 +80,7 @@ class BronzeToSilver:
         """Drop missing values in country_name column"""
 
         if "country_name" in df.columns:
-            df = df.dropna(subset=["country_names"])
+            df = df.dropna(subset=["country_name"])
         
         return df
 
