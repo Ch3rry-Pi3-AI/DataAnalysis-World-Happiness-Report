@@ -42,7 +42,12 @@ def _snake_case_columns(df: pd.DataFrame) -> pd.DataFrame:
     # Apply helper function to df columns
     out.columns = [_to_snake_case(c) for c in out.columns]
 
-    return out           
+    return out
+
+def _numeric_columns(df: pd.DataFrame) -> List[str]:
+    """Create a list of numeric columns in a DataFrame"""
+
+    return [col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]
 
 
 # ------------------------------- #
@@ -83,6 +88,27 @@ class BronzeToSilver:
             df = df.dropna(subset=["country_name"])
         
         return df
+    
+    @staticmethod
+    def _impute_numeric(df: pd.DataFrame) -> pd.DataFrame:
+        """Two-pass imputation: (1) per-country (2) global"""
+        
+        num_cols = _numeric_columns(df)
+
+        if not num_cols:
+            return df
+        
+        if "country_name" in df.columns:
+            df[num_cols] = (
+                df.groupby("country_name")[num_cols]
+                .transform(lambda g: g.fillna(g.mean))
+            )
+
+        for col in num_cols:
+            if df[col].isna().any():
+                df[col] = df[col].fillna(df[col].mean())
+        
+        return df
 
         
 if __name__ == "__main__":
@@ -91,7 +117,7 @@ if __name__ == "__main__":
     df = pd.read_csv(path)
     cleaned = BronzeToSilver._standardise_base(df, default_year=2021)
     filtered = BronzeToSilver._basic_filter(cleaned)
-    print("Filtered DataFrame shape:", filtered.shape)
-    print(filtered.columns)
-    print(filtered.head())
+    imputed = BronzeToSilver._impute_numeric(filtered)
+    print("Imputed DataFrame shape:", imputed.shape)
+    print(imputed.head())
     print("Cleaner")
