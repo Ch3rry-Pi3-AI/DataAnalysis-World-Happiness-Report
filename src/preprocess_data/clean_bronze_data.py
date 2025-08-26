@@ -127,6 +127,26 @@ class BronzeToSilver:
         return df
     
     @staticmethod
+    def _standardise_geo_columns(df: pd.DataFrame) -> pd.DataFrame:
+        df = _snake_case_columns(df)
+
+        if "country_name" in df.columns:
+            df["country_name"] = df["country_name"].astype(str).str.strip()
+
+        return df
+    
+    @staticmethod
+    def _drop_missing_coords(df: pd.DataFrame) -> pd.DataFrame:
+        before = len(df)
+        df = df.dropna(subset=["latitude", "longitude"])
+        after = len(df)
+
+        if after != before:
+            print(f"Dropped {before - after} rows without latitude/longitude")
+
+        return df
+    
+    @staticmethod
     def _save_silver(df: pd.DataFrame, filename: str, silver_folder: str = 'data/silver') -> Path:
         silver_path = Path(silver_folder)
         _ensure_dir(silver_path)
@@ -134,10 +154,20 @@ class BronzeToSilver:
         df.to_csv(out, index=False)
 
         return(out)
+    
 
 # ------------------------------- #
 # Public cleaners (one per file)
 # ------------------------------- #
+
+    def clean_multi_year(self, df_multi: pd.DataFrame) -> pd.DataFrame:
+        df = self._standardise_base(df_multi)
+        df = self._basic_filter(df)
+        df = self._impute_numeric(df)
+        df = self._normalise_regions(df)
+
+        print("multi data cleaned")
+        return df
 
     def clean_y2021(self, df_2021: pd.DataFrame) -> pd.DataFrame:
         """Clean the 2021-only World Happiness dataset"""
@@ -148,8 +178,14 @@ class BronzeToSilver:
         df = self._normalise_regions(df)
 
         print("y2021 data cleaned")
-
         return df 
+
+    def clean_geolocation(self, df_geo: pd.DataFrame) -> pd.DataFrame:
+        df = self._standardise_geo_columns(df_geo)
+        df = self._basic_filter(df)
+        df = self._drop_missing_coords(df)
+
+        return df
 
 # ------------------------------- #
 # Saver methods
@@ -176,14 +212,29 @@ if __name__ == "__main__":
 
     path_geo = Path("data/bronze/geolocation.csv")
     bronze_geolocation_df = pd.read_csv(path_geo)
+    print(bronze_geolocation_df.info())
 
     cleaner = BronzeToSilver()
+
+    multi_clean = cleaner.clean_multi_year(bronze_multi_df)
+    print("Before:", list(bronze_multi_df.columns)[:8])
+    print("After: ", list(multi_clean.columns)[:8])
 
     y2021_clean = cleaner.clean_y2021(bronze_y2021_df)
     print("Before:", list(bronze_y2021_df.columns)[:8])
     print("After: ", list(y2021_clean.columns)[:8])
 
+    geo_clean = cleaner.clean_geolocation(bronze_geolocation_df)
+    print("Before:", list(bronze_geolocation_df.columns)[:4])
+    print("After: ", list(geo_clean.columns)[:4])
+
+    cleaner.save_multi(multi_clean)
+    print("✅ Saved cleaned multi CSV to 🥈 folder")
+
     cleaner.save_y2021(y2021_clean)
     print("✅ Saved cleaned 2021 CSV to 🥈 folder")
+
+    cleaner.save_geolocation(geo_clean)
+    print("✅ Saved cleaned geolocation CSV to 🥈 folder")
 
     print("Cleaner")
