@@ -49,6 +49,9 @@ def _numeric_columns(df: pd.DataFrame) -> List[str]:
 
     return [col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]
 
+def _ensure_dir(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+
 
 # ------------------------------- #
 # Core Cleaner
@@ -109,15 +112,45 @@ class BronzeToSilver:
                 df[col] = df[col].fillna(df[col].mean())
         
         return df
+    
+    @staticmethod
+    def _normalise_regions(df: pd.DataFrame) -> pd.DataFrame:
+        if "regional_indicator" in df.columns:
+            replacements = {
+                "North America and ANZ":"North America",
+                "Eastern Asia":"East Asia",
+                "Southeastern Asia":"Southeast Asia",
+                "Southern Asia":"South Asia"
+            }
+
+            df["regional_indicator"] = df["regional_indicator"].replace(replacements)
+
+        return df
+    
+    @staticmethod
+    def _save_silver(df: pd.DataFrame, filename: str, silver_folder: str = 'data/silver') -> Path:
+        silver_path = Path(silver_folder)
+        _ensure_dir(silver_path)
+        out = silver_path / filename
+        df.to_csv(out, index=False)
+
+        return(out)
+
+# ------------------------------- #
+# Saver methods
+# ------------------------------- #
+
+    def save_y2021(self, df: pd.DataFrame, silver_folder: str = 'data/silver') -> pd.DataFrame:
+        return self._save_silver(df, "world_happiness_2021_silver.csv", silver_folder)
 
         
 if __name__ == "__main__":
     # Test
     path = Path("data/bronze/world-happiness-report-2021.csv")
     df = pd.read_csv(path)
-    cleaned = BronzeToSilver._standardise_base(df, default_year=2021)
-    filtered = BronzeToSilver._basic_filter(cleaned)
-    imputed = BronzeToSilver._impute_numeric(filtered)
-    print("Imputed DataFrame shape:", imputed.shape)
-    print(imputed.head())
+
+    cleaner = BronzeToSilver()
+
+    cleaner.save_y2021(df)
+
     print("Cleaner")
