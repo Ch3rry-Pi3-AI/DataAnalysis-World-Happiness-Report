@@ -117,7 +117,6 @@ class BronzeToSilver:
     def _normalise_regions(df: pd.DataFrame) -> pd.DataFrame:
         if "regional_indicator" in df.columns:
             replacements = {
-                "North America and ANZ":"North America",
                 "Eastern Asia":"East Asia",
                 "Southeastern Asia":"Southeast Asia",
                 "Southern Asia":"South Asia"
