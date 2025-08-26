@@ -80,7 +80,7 @@ class BronzeToSilver:
         """Drop missing values in country_name column"""
 
         if "country_name" in df.columns:
-            df = df.dropna(subset=["country_names"])
+            df = df.dropna(subset=["country_name"])
         
         return df
 
@@ -90,7 +90,8 @@ if __name__ == "__main__":
     path = Path("data/bronze/world-happiness-report-2021.csv")
     df = pd.read_csv(path)
     cleaned = BronzeToSilver._standardise_base(df, default_year=2021)
-    print("Cleaned DataFrame shape:", cleaned.shape)
-    print(cleaned.columns)
-    print(cleaned.head())
+    filtered = BronzeToSilver._basic_filter(cleaned)
+    print("Filtered DataFrame shape:", filtered.shape)
+    print(filtered.columns)
+    print(filtered.head())
     print("Cleaner")
