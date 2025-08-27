@@ -1,25 +1,32 @@
 """
-Simple entry point for downloading the World Happiness Report dataset(s).
+Simple entry point for downloading the World Happiness Report datasets.
 
-This script imports the data download function from the project `src` package
-and runs it in verbose mode (currently). It is intended for quick testing and to
-demonstrate how the download process works.
+This script:
+1) Downloads bronze datasets (World Happiness + Geolocation).
 
 Notes
 -----
 - Run this script directly (`python app.py`) to fetch the datasets.
-- The dataset will be saved in the `data/bronze` folder by default.
+- Bronze outputs are saved in the `data/bronze/` folder by default.
 """
 
-# import the download function
+# ----------------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------------
 from src import (
-    get_world_happiness_data,  # src/get_data/import_happiness_data.py
-    fetch_geolocation_data,
+    get_world_happiness_data,   # src/get_data/import_happiness_data.py
+    fetch_geolocation_data,     # src/get_data/import_geolocation_data.py
 )
 
-# Run only if this script is executed directly (not when imported)
+
+# ----------------------------------------------------------------------
+# Main
+# ----------------------------------------------------------------------
 if __name__ == "__main__":
-    
-    # Call the download function with verbose output enabled
+
+    # ------------------------------------------------------------------
+    # Stage 1: Download bronze datasets
+    # ------------------------------------------------------------------
     get_world_happiness_data(verbose=True)
     fetch_geolocation_data(verbose=True)
+    print("✅ Bronze downloaded 🥉.\n")
