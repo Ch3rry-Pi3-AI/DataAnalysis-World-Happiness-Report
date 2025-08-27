@@ -39,14 +39,14 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------
     get_world_happiness_data(verbose=True)
     fetch_geolocation_data(verbose=True)
-    print("✅ Bronze downloaded.\n")
+    print("✅ Bronze downloaded 🥉.\n")
 
     # ------------------------------------------------------------------
     # Stage 1b: Load bronze datasets
     # ------------------------------------------------------------------
     # Mirrors the style used in load_bronze_data.py (friendly prints)
     multi_df, y2021_df, geo_df = load_all_bronze_data(verbose=True)
-    print("✅ Bronze loaded.\n")
+    print("✅ Bronze loaded 🥉.\n")
 
     # ------------------------------------------------------------------
     # Stage 2: Clean bronze -> silver (three independent cleaners)
@@ -66,16 +66,16 @@ if __name__ == "__main__":
     print("✅ Geolocation cleaned.\n")
 
     # Save each cleaned DataFrame to silver
-    cleaner.save_multi(multi_clean)       # world_happiness_multi_silver.csv
-    cleaner.save_y2021(y2021_clean)       # world_happiness_2021_silver.csv
-    cleaner.save_geolocation(geo_clean)   # geolocation_silver.csv
-    print("✅ All cleaned data saved to silver.\n")
+    cleaner.save_multi(multi_clean)       # data/silver/world_happiness_multi_silver.csv
+    cleaner.save_y2021(y2021_clean)       # data/silver/world_happiness_2021_silver.csv
+    cleaner.save_geolocation(geo_clean)   # data/silver/geolocation_silver.csv
+    print("✅ All cleaned data saved to 🥈 folder.\n")
 
     # ------------------------------------------------------------------
     # Stage 3: Load silver data (same style as bronze loaders)
     # ------------------------------------------------------------------
     # Uses the new Stage 3 loader that mirrors your bronze loader style
     multi_clean_s, y2021_clean_s, geo_clean_s = load_all_silver_data(verbose=True)
-    print("✅ Silver loaded.\n")
+    print("✅ Silver loaded 🥈.\n")
 
 
