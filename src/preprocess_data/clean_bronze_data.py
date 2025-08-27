@@ -1,9 +1,3 @@
-from dataclasses import dataclass
-from pathlib import Path
-from typing import List, Optional
-import re
-import pandas as pd
-
 """
 Bronze → Silver cleaning for the World Happiness project.
 
@@ -16,6 +10,16 @@ This module contains helper functions and a BronzeToSilver class that:
 The goal is to provide a reproducible, teaching-friendly pipeline:
 bronze/raw → silver/cleaned.
 """
+
+# ----------------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------------
+from dataclasses import dataclass
+from pathlib import Path
+from typing import List, Optional
+import re
+import pandas as pd
+
 
 # ----------------------------------------------------------------------
 # Helpers
