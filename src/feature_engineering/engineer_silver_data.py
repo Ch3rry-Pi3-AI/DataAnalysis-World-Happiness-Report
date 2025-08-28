@@ -176,8 +176,33 @@ class SilverToGold:
         if verbose:
             print(f"Appended DataFrame shape: {appended.shape}")
 
-        # Test
-        return appended
+        # ------------------------------------------------------------------
+        # Step 7: merge with geolocation on country_name
+        # ------------------------------------------------------------------
+        geo_renamed = geo_df.rename(columns={geo_country: "country_name"})
+        merged = appended.merge(
+            geo_renamed,
+            on="country_name",
+            how="left",
+            suffixes=("", "_geo"),
+        )
+
+        if verbose:
+            missing_geo = merged["latitude"].isna().sum() if "latitude" in merged.columns else len(merged)
+            print(f"After geo merge: {merged.shape[0]} rows × {merged.shape[1]} cols "
+                  f"(rows missing coords: {missing_geo}).")
+
+        # ------------------------------------------------------------------
+        # Step 8: save to gold
+        # ------------------------------------------------------------------
+        out_dir = Path(self.gold_folder)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / self.engineered_name
+        merged.to_csv(out_path, index=False)
+        if verbose:
+            print(f"Saved gold dataset: {out_path.resolve()}")
+
+        return merged
 
 
 if __name__ == "__main__":
@@ -185,7 +210,7 @@ if __name__ == "__main__":
     multi_clean, y2021_clean, geo_clean = load_all_silver_data(verbose=True)
 
     s2g = SilverToGold()
-    appended = s2g.run(
+    gold_df = s2g.run(
         multi_df=multi_clean,
         y2021_df=y2021_clean,
         geo_df=geo_clean,
@@ -194,16 +219,14 @@ if __name__ == "__main__":
     )
 
     # quick spot-checks
-    print("— appended (Afghanistan) —")
+    print("\n— gold (Afghanistan) —")
     print(
-        appended.loc[appended["country_name"] == "Australia"]
-                .sort_values("year")
-                .head(25)
+        gold_df.loc[gold_df["country_name"] == "Afghanistan",
+                    ["country_name","year","regional_indicator","ladder_score","logged_gdp_per_capita","latitude","longitude"]]
+               .sort_values("year")
+               .head(25)
     )
-
-    # optional sanity checks
-    print("\nColumns:", list(appended.columns))
-    print("Rows:", len(appended))
-    print("Unique (country, year) pairs:", appended.drop_duplicates(["country_name","year"]).shape[0])
+    print("\nSaved rows:", len(gold_df))
     print("OK")
+
 
