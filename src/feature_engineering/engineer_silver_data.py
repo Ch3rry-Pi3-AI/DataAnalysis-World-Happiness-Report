@@ -152,8 +152,32 @@ class SilverToGold:
             print(f"Using {multi_aligned.shape[1]} shared columns for append.")
             print(f"Shared columns: {list(multi_aligned.columns)}")
 
-        # Return the aligned frames to test
-        return multi_aligned, y2021_aligned
+        # ------------------------------------------------------------------
+        # Step 6: append with precedence to 2021 rows on (country_name, year)
+        # ------------------------------------------------------------------
+        
+        union = pd.concat([multi_aligned, y2021_aligned], ignore_index=True)
+
+        y2021_keys = set(zip(
+            y2021_aligned["country_name"].astype(str),
+            y2021_aligned["year"],
+        ))
+
+        union["_is_2021_row"] = list(zip(union["country_name"].astype(str), union["year"]))
+        union["_is_2021_row"] = union["_is_2021_row"].isin(y2021_keys).astype(int)
+
+        appended = (
+            union.sort_values(["country_name", "year", "_is_2021_row"])
+                 .drop_duplicates(["country_name", "year"], keep="last")
+                 .drop(columns=["_is_2021_row"])
+                 .reset_index(drop=True)
+        )
+
+        if verbose:
+            print(f"Appended DataFrame shape: {appended.shape}")
+
+        # Test
+        return appended
 
 
 if __name__ == "__main__":
@@ -161,7 +185,7 @@ if __name__ == "__main__":
     multi_clean, y2021_clean, geo_clean = load_all_silver_data(verbose=True)
 
     s2g = SilverToGold()
-    multi_aligned, y2021_aligned = s2g.run(
+    appended = s2g.run(
         multi_df=multi_clean,
         y2021_df=y2021_clean,
         geo_df=geo_clean,
@@ -169,8 +193,17 @@ if __name__ == "__main__":
         verbose=True,
     )
 
-    print("— multi_aligned —")
-    print(multi_aligned[multi_aligned["country_name"] == "Afghanistan"].head(25))
-    print("\n— y2021_aligned —")
-    print(y2021_aligned[y2021_aligned["country_name"] == "Afghanistan"].head(25))
+    # quick spot-checks
+    print("— appended (Afghanistan) —")
+    print(
+        appended.loc[appended["country_name"] == "Australia"]
+                .sort_values("year")
+                .head(25)
+    )
+
+    # optional sanity checks
+    print("\nColumns:", list(appended.columns))
+    print("Rows:", len(appended))
+    print("Unique (country, year) pairs:", appended.drop_duplicates(["country_name","year"]).shape[0])
     print("OK")
+
