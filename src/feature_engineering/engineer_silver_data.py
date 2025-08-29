@@ -1,3 +1,7 @@
+# ----------------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------------
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, Tuple
@@ -22,8 +26,7 @@ def _build_normalised_map(columns: Iterable[str]) -> Dict[str, str]:
     return mapping
 
 # ----------------------------------------------------------------------
-# Aliases (normalised_name -> canonical name)
-# Use 2021-style names as canonical targets.
+# Aliases (normalised_names -> canonical [2021-style] names)
 # ----------------------------------------------------------------------
 
 ALIASES: Dict[str, str] = {
@@ -65,6 +68,9 @@ def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame
     b_aligned.columns = out_cols
     return a_aligned, b_aligned
 
+# ----------------------------------------------------------------------
+# Core class
+# ----------------------------------------------------------------------
 
 @dataclass
 class SilverToGold:
@@ -79,7 +85,8 @@ class SilverToGold:
             geo_df: pd.DataFrame,
             *,
             restrict_multi_to_2021_countries: bool = True,
-            verbose: bool = False
+            verbose: bool = False,
+            save_output = True
     ) -> pd.DataFrame:
 
         # ------------------------------------------------------------------
@@ -216,9 +223,10 @@ if __name__ == "__main__":
         geo_df=geo_clean,
         restrict_multi_to_2021_countries=True,
         verbose=True,
+        save_output=True
     )
 
-    # quick spot-checks
+    # Quick smoke test
     print("\n— gold (Afghanistan) —")
     print(
         gold_df.loc[gold_df["country_name"] == "Afghanistan",
@@ -228,5 +236,4 @@ if __name__ == "__main__":
     )
     print("\nSaved rows:", len(gold_df))
     print("OK")
-
-
+    
