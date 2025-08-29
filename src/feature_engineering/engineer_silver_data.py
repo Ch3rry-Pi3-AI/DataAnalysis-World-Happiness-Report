@@ -266,21 +266,26 @@ class SilverToGold:
         # Step 6: append with precedence to 2021 rows on (country_name, year)
         # ------------------------------------------------------------------
         
+        # Combine the aligned multi-year and 2021 DataFrames into a single table.
         union = pd.concat([multi_aligned, y2021_aligned], ignore_index=True)
 
+        # Build the set of (country_name, year) keys that originate from the 2021 dataset.
         y2021_keys = set(zip(
+            # Cast country to str on both sides to avoid type mismatches in tuple comparisons.
             y2021_aligned["country_name"].astype(str),
             y2021_aligned["year"],
         ))
 
+        # Create (country_name, year) key and flag for whether that key exists in the 2021 set.
         union["_is_2021_row"] = list(zip(union["country_name"].astype(str), union["year"]))
         union["_is_2021_row"] = union["_is_2021_row"].isin(y2021_keys).astype(int)
 
+        # Sort so non-2021 rows (0) come first and 2021 rows (1) come last.
         appended = (
-            union.sort_values(["country_name", "year", "_is_2021_row"])
-                 .drop_duplicates(["country_name", "year"], keep="last")
-                 .drop(columns=["_is_2021_row"])
-                 .reset_index(drop=True)
+            union.sort_values(["country_name", "year", "_is_2021_row"])   # 0 before 1
+                 .drop_duplicates(["country_name", "year"], keep="last")  # keep the 2021 row if present
+                 .drop(columns=["_is_2021_row"])                          # remove helper flag
+                 .reset_index(drop=True)                                  # tidy index
         )
 
         if verbose:
@@ -324,7 +329,10 @@ class SilverToGold:
         # Step 8: merge with geolocation on country_name
         # ------------------------------------------------------------------
 
+        # Standardise the geo country column name to match the merge key used in `appended`
         geo_renamed = geo_df.rename(columns={geo_country: "country_name"})
+
+        # Left-join geolocation onto the happiness data.
         merged = appended.merge(
             geo_renamed,
             on="country_name",
@@ -341,37 +349,51 @@ class SilverToGold:
         # Step 9: save to gold
         # ------------------------------------------------------------------
 
+        # Ensure the gold output directory exists (create parents if needed).
         out_dir = Path(self.gold_folder)
         out_dir.mkdir(parents=True, exist_ok=True)
+
+        # Compose the full output path and write the engineered dataset as CSV (no row index).
         out_path = out_dir / self.engineered_name
         merged.to_csv(out_path, index=False)
+        
         if verbose:
             print(f"Saved gold dataset: {out_path.resolve()}\n")
 
         return merged
 
 
+# ----------------------------------------------------------------------
+# Script Entry Point (quick smoke run)
+# ----------------------------------------------------------------------
+
 if __name__ == "__main__":
+    
+    # Load inputs from the silver layer (helper returns 3 DataFrames).
     from load_silver_data import load_all_silver_data
     multi_clean, y2021_clean, geo_clean = load_all_silver_data(verbose=True)
 
+    # Instantiate the transformer (dataclass holds folders and output filename).
     s2g = SilverToGold()
+
+    # Run the end-to-end silver → gold transformation.
     gold_df = s2g.run(
         multi_df=multi_clean,
         y2021_df=y2021_clean,
         geo_df=geo_clean,
         restrict_multi_to_2021_countries=True,
         verbose=True,
-        save_output=True
+        save_output=True,
     )
 
-    # Quick smoke test
-    print("\n— gold (Afghanistan) —")
-    print(
-        gold_df.loc[gold_df["country_name"] == "Afghanistan",
-                    ["country_name","year","regional_indicator","ladder_score","logged_gdp_per_capita","latitude","longitude"]]
-               .sort_values("year")
-               .head(25)
-    )
-    print("\nSaved rows:", len(gold_df))
-    print("OK")
+    # Show the transformer configuration (dataclass repr is concise and readable).
+    print("\n— SilverToGold configuration —")
+    print(s2g)
+
+    # Quick preview of the engineered dataset.
+    print("\n— Gold preview (first 10 rows) —")
+    try:
+        # to_string avoids truncated columns in some terminals.
+        print(gold_df.head(10).to_string(index=False))
+    except Exception:
+        print(gold_df.head(10))

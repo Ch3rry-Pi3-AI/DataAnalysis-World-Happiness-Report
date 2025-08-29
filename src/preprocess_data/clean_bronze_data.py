@@ -415,6 +415,8 @@ class BronzeToSilver:
 # ----------------------------------------------------------------------
 
 if __name__ == "__main__":
+
+    # Instantiate the transformer (dataclass holds folders and output filename).
     cleaner = BronzeToSilver()
 
     paths = {
