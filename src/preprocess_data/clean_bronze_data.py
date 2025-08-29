@@ -14,6 +14,7 @@ bronze/raw → silver/cleaned.
 # ----------------------------------------------------------------------
 # Imports
 # ----------------------------------------------------------------------
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
@@ -114,7 +115,9 @@ class BronzeToSilver:
     - save each cleaned DataFrame into the 🥈 silver layer.
     """
 
-    # ------------------ Standardisation ------------------ #
+    # ------------------------------------------------------------------
+    # Step 1: Standardisation
+    # ------------------------------------------------------------------
 
     @staticmethod
     def _standardise_base(
@@ -151,6 +154,10 @@ class BronzeToSilver:
             df["country_name"] = df["country_name"].astype(str).str.strip()
 
         return df
+    
+    # ------------------------------------------------------------------
+    # Step 2: Filtering
+    # ------------------------------------------------------------------
 
     @staticmethod
     def _basic_filter(df: pd.DataFrame) -> pd.DataFrame:
@@ -169,6 +176,10 @@ class BronzeToSilver:
         if "country_name" in df.columns:
             df = df.dropna(subset=["country_name"])
         return df
+
+    # ------------------------------------------------------------------
+    # Step 3: Imputation
+    # ------------------------------------------------------------------
 
     @staticmethod
     def _impute_numeric(df: pd.DataFrame) -> pd.DataFrame:
@@ -201,6 +212,10 @@ class BronzeToSilver:
                 df[col] = df[col].fillna(df[col].mean())
 
         return df
+    
+    # ------------------------------------------------------------------
+    # Step 4: Region Normalisation
+    # ------------------------------------------------------------------
 
     @staticmethod
     def _normalise_regions(df: pd.DataFrame) -> pd.DataFrame:
@@ -222,8 +237,14 @@ class BronzeToSilver:
                 "Southeastern Asia": "Southeast Asia",
                 "Southern Asia": "South Asia",
             }
+
             df["regional_indicator"] = df["regional_indicator"].replace(replacements)
+        
         return df
+    
+    # ------------------------------------------------------------------
+    # Step 5: Geolocation Standardisation
+    # ------------------------------------------------------------------
 
     @staticmethod
     def _standardise_geo_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -267,6 +288,10 @@ class BronzeToSilver:
             print(f"Dropped {before - after} rows without lat/lon\n")
         return df
 
+    # ------------------------------------------------------------------
+    # Step 6: Persistence
+    # ------------------------------------------------------------------
+
     @staticmethod
     def _save_silver(
         df: pd.DataFrame, filename: str, silver_folder: str = "data/silver"
@@ -295,7 +320,9 @@ class BronzeToSilver:
         df.to_csv(out, index=False)
         return out
 
-    # ------------------ Public cleaners ------------------ #
+    # ------------------------------------------------------------------
+    # Step 7: Public Cleaners
+    # ------------------------------------------------------------------
 
     def clean_multi_year(self, df_multi: pd.DataFrame) -> pd.DataFrame:
         """
@@ -364,7 +391,9 @@ class BronzeToSilver:
         print("✅ Geolocation cleaned\n")
         return df
 
-    # ------------------ Saver methods ------------------ #
+    # ------------------------------------------------------------------
+    # Step 8: Saving Methods
+    # ------------------------------------------------------------------
 
     def save_multi(self, df: pd.DataFrame, silver_folder: str = "data/silver") -> Path:
         """Save cleaned multi-year dataset to silver folder."""
@@ -386,6 +415,8 @@ class BronzeToSilver:
 # ----------------------------------------------------------------------
 
 if __name__ == "__main__":
+
+    # Instantiate the transformer (dataclass holds folders and output filename).
     cleaner = BronzeToSilver()
 
     paths = {
