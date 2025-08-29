@@ -159,7 +159,6 @@ class BronzeToSilver:
     # Step 2: Filtering
     # ------------------------------------------------------------------
 
-
     @staticmethod
     def _basic_filter(df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -238,7 +237,9 @@ class BronzeToSilver:
                 "Southeastern Asia": "Southeast Asia",
                 "Southern Asia": "South Asia",
             }
+
             df["regional_indicator"] = df["regional_indicator"].replace(replacements)
+        
         return df
     
     # ------------------------------------------------------------------
