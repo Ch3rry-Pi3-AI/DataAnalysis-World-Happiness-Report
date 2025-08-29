@@ -89,7 +89,7 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------
     # Stage 4: Silver → Gold (append 2021 into multi-year, merge geo, save)
     # ------------------------------------------------------------------
-    
+
     s2g = SilverToGold()
     gold_df = s2g.run(
         multi_df=multi_clean_s,
@@ -99,4 +99,4 @@ if __name__ == "__main__":
         verbose=True,
         save_output=True,
     )
-    print("✅ Gold dataset created and saved to data/gold/ 🥇.\n")
+    print("✅ Gold dataset created and saved to 🥇 folder.\n")

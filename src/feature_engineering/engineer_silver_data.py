@@ -1,3 +1,16 @@
+"""
+Silver → Gold transformation for the World Happiness project.
+
+This module contains helper functions and a SilverToGold class that:
+- normalises and aligns multi-year, 2021-only, and geolocation datasets,
+- applies alias mappings to harmonise semantics,
+- merges with geolocation coordinates,
+- and writes engineered CSVs into the 🥇 gold layer.
+
+The goal is to provide a reproducible, teaching-friendly pipeline:
+silver/cleaned → gold/engineered.
+"""
+
 # ----------------------------------------------------------------------
 # Imports
 # ----------------------------------------------------------------------
@@ -13,59 +26,130 @@ import pandas as pd
 # ----------------------------------------------------------------------
 
 def _snake_normalise(name: str) -> str:
-    s = re.sub(r"[^\w]+", "_", name.strip().lower())
-    s = re.sub(r"_+", "_", s).strip("_")
+    """
+    Convert a string to normalised snake_case.
+
+    Parameters
+    ----------
+    name : str
+        Original column name.
+
+    Returns
+    -------
+    str
+        Normalised snake_case string (lowercased, non-alphanumerics as underscores).
+    """
+
+    # Lower-case and trim the input, then replace any run of non-word chars with a single underscore.
+    s = re.sub(r"[^\w]+", "_", name.strip().lower())            # e.g. " GDP / Capita " -> "gdp_capita"
+
+    # Collapse multiple underscores and remove any leading/trailing underscores.
+    s = re.sub(r"_+", "_", s).strip("_")                        # e.g. "__gdp__per__capita__" -> "gdp_per_capita"
+
+    # Return the normalised snake_case string.
     return s
 
 def _build_normalised_map(columns: Iterable[str]) -> Dict[str, str]:
+    """
+    Build a mapping from normalised names to original column names.
+
+    Parameters
+    ----------
+    columns : Iterable[str]
+        Iterable of original column names.
+
+    Returns
+    -------
+    dict[str, str]
+        Mapping of normalised_name → first-occurring original name.
+    """
+    
+    # Start with an empty mapping (normalised_name -> first-seen original column).
     mapping: Dict[str, str] = {}
+
+    # Walk through the provided column names in order.
     for c in columns:
+
+        # Compute the normalised key for this column.
         key = _snake_normalise(c)
+
+        # Only keep the first occurrence for each normalised key (stable mapping).
         if key not in mapping:
-            mapping [key] = c
+            mapping[key] = c  
+
+    # Return the mapping for downstream lookups.
     return mapping
 
 # ----------------------------------------------------------------------
 # Aliases (normalised_names -> canonical [2021-style] names)
 # ----------------------------------------------------------------------
 
+# Map *normalised* source names to canonical 2021-style column names.
 ALIASES: Dict[str, str] = {
     "life_ladder": "ladder_score",
     "log_gdp_per_capita": "logged_gdp_per_capita",
-    "healthy_life_expectancy_at_birth": "healthy_life_expectancy"
+    "healthy_life_expectancy_at_birth": "healthy_life_expectancy",
 }
 
 def _apply_aliases(df: pd.DataFrame, aliases: Dict[str, str]) -> pd.DataFrame:
     """
     Use normalised-name aliases to rename columns to canonical targets.
     """
+    # Build a lookup from normalised_name -> original_name for the current DataFrame.
     norm_to_orig = _build_normalised_map(df.columns)
+
+    # Prepare a rename dict mapping original_name -> canonical_target.
     rename_dict: Dict[str, str] = {}
+
+    # For each normalised key in the DataFrame ...
     for norm_name, orig_name in norm_to_orig.items():
+
+        # ... if we have an alias and the original differs from the canonical ...
         if norm_name in aliases and aliases[norm_name] != orig_name:
-            rename_dict[orig_name] = aliases[norm_name]
+
+            # ... schedule a rename.
+            rename_dict[orig_name] = aliases[norm_name]  # e.g. "life_ladder" -> "ladder_score"
+
+    # Apply renames if any; otherwise return the DataFrame untouched.
     return df.rename(columns=rename_dict) if rename_dict else df
     
+
 def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Intersect columns between `a` and `b` using normalised names.
     Returns aligned copies with identical column order/names.
     """
+    # Build normalised_name -> original_name maps for both DataFrames.
     a_map = _build_normalised_map(a.columns)
     b_map = _build_normalised_map(b.columns)
+
+    # Compute the set of shared normalised keys (i.e., common columns ignoring minor name differences).
     shared_keys = sorted(set(a_map).intersection(b_map))
+
     if not shared_keys:
+
+        # No overlap after normalisation — bail out with a clear error.
         raise ValueError("No shared columns found between the two DataFrames after normalisation")
 
+    # Pretty-name helper
     def _pretty(orig: str) -> str:
         snake = _snake_normalise(orig)
+
+        # If the original is already snake_case, keep it; otherwise show the snake_case.
         return orig if orig == snake else snake
 
+    # Create the output column names in a stable order.
     out_cols = [_pretty(a_map[k]) for k in shared_keys]
+
+    # Select and copy the shared columns from each DataFrame in the same order.
     a_aligned = a.loc[:, [a_map[k] for k in shared_keys]].copy()
     b_aligned = b.loc[:, [b_map[k] for k in shared_keys]].copy()
+
+    # Rename both to the common set of names so downstream concatenation/merges are trivial.
     a_aligned.columns = out_cols
     b_aligned.columns = out_cols
+
+    # Return the aligned DataFrames (same columns, same order, same names).
     return a_aligned, b_aligned
 
 # ----------------------------------------------------------------------
@@ -94,10 +178,15 @@ class SilverToGold:
         # ------------------------------------------------------------------
 
         def _find_col(df: pd.DataFrame, target_norm: str) -> str:
+            # Build a mapping from normalised_name -> original_name for columns in df.
             norm_map = _build_normalised_map(df.columns)
+
+            # Scan for the target normalised name and return the original column name when found.
             for n, orig in norm_map.items():
                 if n == target_norm:
                     return orig
+
+            # If nothing matched, raise a clear error with a helpful hint.
             raise KeyError(
                 f"Expected a column matching '{target_norm}' (e.g., '{target_norm}' or a close variant)."
             )
@@ -116,10 +205,19 @@ class SilverToGold:
         multi_work = multi_df.copy()
         y2021_work = y2021_df.copy()
 
+        # Build the set of valid country labels from the 2021 dataset.
         if restrict_multi_to_2021_countries:
+            
+            # Cast to str on both sides to avoid type-mismatch issues before the membership test.
             valid = set(y2021_work[y21_country].astype(str))
+
+            # Keep a count so we can report how many rows were removed by the filter.
             before = len(multi_work)
+
+            # Filter multi_work down to only those rows whose country is present in 2021.
             multi_work = multi_work[multi_work[multi_country].astype(str).isin(valid)].copy()
+
+            # Number of rows dropped by the restriction.
             removed = before - len(multi_work)
 
             if verbose:
@@ -129,15 +227,20 @@ class SilverToGold:
         # Step 3: Inject `regional_indicator` into multi-year from 2021 mapping
         # ------------------------------------------------------------------
 
+        # Build a country -> regional_indicator lookup from the 2021 dataset.
         country_region = (
             y2021_work[[y21_country, y21_region]]
-            .drop_duplicates()
+            .drop_duplicates()  # ensure one row per country/region pairing
             .rename(columns={y21_country: multi_country, y21_region: "regional_indicator"})
         )
 
+        # If multi_work has 'regional_indicator' column AND the country column name != 'country_name'...
         if "regional_indicator" in multi_work.columns and multi_country != "country_name":
+            
+            # ... drop the existing region column to avoid duplicate/conflicting columns at merge time.
             multi_work = multi_work.drop(columns="regional_indicator")
-        
+
+        # Left-join the region info onto the multi-year data so every country gets its 2021 region label.
         multi_work = multi_work.merge(
             country_region, on=multi_country, how="left"
         )
@@ -188,10 +291,10 @@ class SilverToGold:
         # Step 7: harmonise geo country names to match happiness names
         # ------------------------------------------------------------------
 
-        # Map geo country labels -> happiness labels (extend as needed)
+        # Map geo country labels -> happiness labels 
         geo_to_happy = {
             "Congo [Republic]": "Congo (Brazzaville)",
-            "Congo [DRC]": "Congo (Brazzaville)",  # per project decision
+            "Congo [DRC]": "Congo (Brazzaville)",  
             "Hong Kong": "Hong Kong S.A.R. of China",
             "Côte d'Ivoire": "Ivory Coast",
             "Myanmar [Burma]": "Myanmar",
@@ -237,6 +340,7 @@ class SilverToGold:
         # ------------------------------------------------------------------
         # Step 9: save to gold
         # ------------------------------------------------------------------
+
         out_dir = Path(self.gold_folder)
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / self.engineered_name
