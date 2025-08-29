@@ -142,14 +142,18 @@ class BronzeToSilver:
             Standardised DataFrame.
         """
 
+        # Convert all column names to snake_case for consistency across datasets.
         df = _snake_case_columns(df)
 
+        # If the dataset used 'country' rather than 'country_name', standardise the key.
         if "country_name" not in df.columns and "country" in df.columns:
-            df = df.rename(columns={"country": "country_name"})
+            df = df.rename(columns={"country": "country_name"})  # unify merge key
 
+        # If a year column is missing, add one using the provided default (e.g., 2021).
         if default_year is not None and "year" not in df.columns:
             df["year"] = default_year
 
+        # Clean up the country field: ensure string type and remove leading/trailing spaces.
         if "country_name" in df.columns:
             df["country_name"] = df["country_name"].astype(str).str.strip()
 
@@ -184,9 +188,7 @@ class BronzeToSilver:
     @staticmethod
     def _impute_numeric(df: pd.DataFrame) -> pd.DataFrame:
         """
-        Impute missing numeric values:
-        1) fill within-country mean,
-        2) fill remaining with global mean.
+        Impute missing numeric values using within-country mean
 
         Parameters
         ----------
@@ -197,19 +199,17 @@ class BronzeToSilver:
         pandas.DataFrame
         """
 
+        # Identify which columns are numeric so we can impute their missing values.
         num_cols = _numeric_columns(df)
         if not num_cols:
-            return df
+            return df  # nothing to impute
 
+        # Within-country mean imputation (preserves country-level signal).
         if "country_name" in df.columns:
             df[num_cols] = (
                 df.groupby("country_name")[num_cols]
-                .transform(lambda g: g.fillna(g.mean()))
+                  .transform(lambda g: g.fillna(g.mean()))
             )
-
-        for col in num_cols:
-            if df[col].isna().any():
-                df[col] = df[col].fillna(df[col].mean())
 
         return df
     
@@ -314,10 +314,16 @@ class BronzeToSilver:
             Path to the saved file.
         """
 
+        # Ensure the silver output directory exists (create parents if needed).
         silver_path = Path(silver_folder)
-        _ensure_dir(silver_path)
+        _ensure_dir(silver_path)  # safe no-op if already present
+
+        # Compose the full output path inside the 🥈 silver layer.
         out = silver_path / filename
+
+        # Write the DataFrame to CSV (no row index in the file).
         df.to_csv(out, index=False)
+
         return out
 
     # ------------------------------------------------------------------
