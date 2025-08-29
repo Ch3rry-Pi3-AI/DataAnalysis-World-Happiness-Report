@@ -28,6 +28,7 @@ def _read_csv(path: Path) -> pd.DataFrame:
     # ----------------------------------------------------------------------
     # Try to read; normalise common error cases into clear messages
     # ----------------------------------------------------------------------
+
     try:
         return pd.read_csv(path)
 
@@ -76,6 +77,7 @@ def load_silver_happiness_data(
     # ----------------------------------------------------------------------
     # Step 1: Build file paths
     # ----------------------------------------------------------------------
+
     silver_path = Path(silver_folder)
     multi_file = silver_path / "world_happiness_multi_silver.csv"
     y2021_file = silver_path / "world_happiness_2021_silver.csv"
@@ -83,6 +85,7 @@ def load_silver_happiness_data(
     # ----------------------------------------------------------------------
     # Step 2: Read with friendly error handling
     # ----------------------------------------------------------------------
+
     multi_df = _read_csv(multi_file)
     if verbose:
         print(
@@ -100,6 +103,7 @@ def load_silver_happiness_data(
     # ----------------------------------------------------------------------
     # Step 3: Return both DataFrames
     # ----------------------------------------------------------------------
+    
     return multi_df, y2021_df
 
 
