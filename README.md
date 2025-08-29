@@ -17,12 +17,12 @@ project-root/
 ├── app.py
 ├── src/
 │   ├── __init__.py
-│   ├── get_data/
-│   │   ├── __init__.py
-│   │   ├── import_happiness_data.py
-│   │   └── import_geolocation_data.py
-└── data/           # created at runtime
-    └── bronze/
+│   ├── get_data/                               🆕 (NEW)
+│   │   ├── __init__.py                         🆕
+│   │   ├── import_happiness_data.py            🆕
+│   │   └── import_geolocation_data.py          🆕
+└── data/           
+    └── bronze/     # raw input datasets        🆕
 ```
 
 * `import_happiness_data.py` → Downloads and extracts the World Happiness Report 2021 dataset.
