@@ -22,13 +22,13 @@ project-root/
 │   │   ├── __init__.py
 │   │   ├── import_happiness_data.py
 │   │   └── import_geolocation_data.py
-│   ├── preprocess_data/ 🆕 (NEW)
-│   │   ├── __init__.py 🆕
-│   │   ├── load_bronze_data.py 🆕
-│   │   └── clean_bronze_data.py 🆕
+│   ├── preprocess_data/                    🆕 (NEW)
+│   │   ├── __init__.py                     🆕
+│   │   ├── load_bronze_data.py             🆕
+│   │   └── clean_bronze_data.py            🆕
 └── data/
-    ├── bronze/    # raw input datasets
-    └── silver/    # cleaned outputs 🆕
+    ├── bronze/    
+    └── silver/    # cleaned outputs        🆕
 ```
 
 * `load_bronze_data.py` → Loads all bronze CSVs (multi-year, 2021, geolocation) into pandas DataFrames.
