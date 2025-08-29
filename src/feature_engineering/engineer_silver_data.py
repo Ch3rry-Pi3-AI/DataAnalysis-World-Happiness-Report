@@ -1,3 +1,7 @@
+# ----------------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------------
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, Tuple
@@ -22,8 +26,7 @@ def _build_normalised_map(columns: Iterable[str]) -> Dict[str, str]:
     return mapping
 
 # ----------------------------------------------------------------------
-# Aliases (normalised_name -> canonical name)
-# Use 2021-style names as canonical targets.
+# Aliases (normalised_names -> canonical [2021-style] names)
 # ----------------------------------------------------------------------
 
 ALIASES: Dict[str, str] = {
@@ -65,6 +68,9 @@ def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame
     b_aligned.columns = out_cols
     return a_aligned, b_aligned
 
+# ----------------------------------------------------------------------
+# Core class
+# ----------------------------------------------------------------------
 
 @dataclass
 class SilverToGold:
@@ -79,7 +85,8 @@ class SilverToGold:
             geo_df: pd.DataFrame,
             *,
             restrict_multi_to_2021_countries: bool = True,
-            verbose: bool = False
+            verbose: bool = False,
+            save_output = True
     ) -> pd.DataFrame:
 
         # ------------------------------------------------------------------
@@ -116,7 +123,7 @@ class SilverToGold:
             removed = before - len(multi_work)
 
             if verbose:
-                print(f"Filtered multi-year to 2021 countries: {removed} rows removed")
+                print(f"Filtered multi-year to 2021 countries: {removed} rows removed\n")
 
         # ------------------------------------------------------------------
         # Step 3: Inject `regional_indicator` into multi-year from 2021 mapping
@@ -174,11 +181,46 @@ class SilverToGold:
         )
 
         if verbose:
-            print(f"Appended DataFrame shape: {appended.shape}")
+            print(f"Appended DataFrame shape: {appended.shape}\n")
+
 
         # ------------------------------------------------------------------
-        # Step 7: merge with geolocation on country_name
+        # Step 7: harmonise geo country names to match happiness names
         # ------------------------------------------------------------------
+
+        # Map geo country labels -> happiness labels (extend as needed)
+        geo_to_happy = {
+            "Congo [Republic]": "Congo (Brazzaville)",
+            "Congo [DRC]": "Congo (Brazzaville)",  # per project decision
+            "Hong Kong": "Hong Kong S.A.R. of China",
+            "Côte d'Ivoire": "Ivory Coast",
+            "Myanmar [Burma]": "Myanmar",
+            "Cyprus": "North Cyprus",
+            "Macedonia [FYROM]": "North Macedonia",
+            "Taiwan": "Taiwan Province of China",
+        }
+
+        # Work on a copy; rename the geo country column to 'country_name' for a clean merge key
+        geo_harmonised = geo_df.rename(columns={geo_country: "country_name"}).copy()
+
+        # Apply the mapping
+        if "country_name" in geo_harmonised.columns:
+            geo_harmonised["country_name"] = (
+                geo_harmonised["country_name"].replace(geo_to_happy)
+            )
+
+        if verbose:
+            n_changed = sum(
+                1
+                for v in geo_df[geo_country].astype(str).unique()
+                if v in geo_to_happy
+            )
+            print(f"Harmonised geo names using {n_changed} explicit mappings.\n")
+
+        # ------------------------------------------------------------------
+        # Step 8: merge with geolocation on country_name
+        # ------------------------------------------------------------------
+
         geo_renamed = geo_df.rename(columns={geo_country: "country_name"})
         merged = appended.merge(
             geo_renamed,
@@ -189,18 +231,18 @@ class SilverToGold:
 
         if verbose:
             missing_geo = merged["latitude"].isna().sum() if "latitude" in merged.columns else len(merged)
-            print(f"After geo merge: {merged.shape[0]} rows × {merged.shape[1]} cols "
-                  f"(rows missing coords: {missing_geo}).")
+            print(f"After geo merge: {merged.shape[0]} rows x {merged.shape[1]} cols "
+                  f"(rows missing coords: {missing_geo}).\n")
 
         # ------------------------------------------------------------------
-        # Step 8: save to gold
+        # Step 9: save to gold
         # ------------------------------------------------------------------
         out_dir = Path(self.gold_folder)
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / self.engineered_name
         merged.to_csv(out_path, index=False)
         if verbose:
-            print(f"Saved gold dataset: {out_path.resolve()}")
+            print(f"Saved gold dataset: {out_path.resolve()}\n")
 
         return merged
 
@@ -216,9 +258,10 @@ if __name__ == "__main__":
         geo_df=geo_clean,
         restrict_multi_to_2021_countries=True,
         verbose=True,
+        save_output=True
     )
 
-    # quick spot-checks
+    # Quick smoke test
     print("\n— gold (Afghanistan) —")
     print(
         gold_df.loc[gold_df["country_name"] == "Afghanistan",
@@ -228,5 +271,3 @@ if __name__ == "__main__":
     )
     print("\nSaved rows:", len(gold_df))
     print("OK")
-
-

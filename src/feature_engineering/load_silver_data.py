@@ -126,12 +126,14 @@ def load_silver_geolocation_data(
     # ----------------------------------------------------------------------
     # Step 1: Build file path
     # ----------------------------------------------------------------------
+
     silver_path = Path(silver_folder)
     geo_file = silver_path / "geolocation_silver.csv"
 
     # ----------------------------------------------------------------------
     # Step 2: Read with friendly error handling
     # ----------------------------------------------------------------------
+
     geo_df = _read_csv(geo_file)
     if verbose:
         print(
@@ -142,6 +144,7 @@ def load_silver_geolocation_data(
     # ----------------------------------------------------------------------
     # Step 3: Return DataFrame
     # ----------------------------------------------------------------------
+
     return geo_df
 
 
@@ -168,6 +171,7 @@ def load_all_silver_data(
     # ----------------------------------------------------------------------
     # Step 1: Load the two happiness tables
     # ----------------------------------------------------------------------
+
     multi_df, y2021_df = load_silver_happiness_data(
         verbose=verbose, silver_folder=silver_folder
     )
@@ -175,6 +179,7 @@ def load_all_silver_data(
     # ----------------------------------------------------------------------
     # Step 2: Load the geolocation table
     # ----------------------------------------------------------------------
+
     geo_df = load_silver_geolocation_data(
         verbose=verbose, silver_folder=silver_folder
     )
@@ -185,6 +190,7 @@ def load_all_silver_data(
     # ----------------------------------------------------------------------
     # Step 3: Return all three
     # ----------------------------------------------------------------------
+    
     return multi_df, y2021_df, geo_df
 
 
