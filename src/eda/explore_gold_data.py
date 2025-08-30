@@ -70,6 +70,19 @@ class EDAExplorer:
         out = pd.DataFrame(rows)
         print(out)
         return out
+    
+    def missing(self, plot: bool = True) -> pd.DataFrame:
+        missing = self.df.isna().sum().sort_values(ascending=False)
+        missing = missing[missing > 0]
+        if plot and not missing.empty:
+            fig, ax = plt.subplots(
+                figsize = (8, 0.3 * len(missing))
+            )
+            missing.sort_values().plot.barh(ax=ax)
+            ax.set_title("Missing values by column")
+            ax.set_xlabel("Count")
+        print(missing.to_frame(name="missing"))
+        return missing.to_frame(name="missing")
 
 
 if __name__ == "__main__":
@@ -83,3 +96,4 @@ if __name__ == "__main__":
     exp.info()
     exp.describe_numeric(exclude=["year", "latitude", "longitude"])
     exp.describe_categorical()
+    exp.missing(plot=False)
