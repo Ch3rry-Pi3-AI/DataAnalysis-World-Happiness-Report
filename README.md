@@ -1,4 +1,4 @@
-# Feature Engineering – Silver → Gold
+# Feature Engineering – Silver -> Gold
 
 This branch focuses on **loading the cleaned silver datasets** and **engineering them into a single, user-ready gold dataset**.
 
@@ -7,7 +7,7 @@ What this stage does:
 * Robustly locates key columns by normalised names and aligns schemas across sources.
 * Injects `regional_indicator` into the multi-year data from the 2021 mapping.
 * Optionally restricts multi-year rows to countries present in 2021.
-* Applies alias mappings (e.g., `life_ladder` → `ladder_score`) to harmonise semantics.
+* Applies alias mappings (e.g., `life_ladder` -> `ladder_score`) to harmonise semantics.
 * Intersects & aligns columns, appends with precedence to 2021 rows on `(country_name, year)`, and merges geolocation.
 * Writes a single CSV to the **gold** layer: `world_happiness_gold.csv`.
 
@@ -41,9 +41,9 @@ project-root/
         └── world_happiness_gold.csv         🥇
 ```
 
-* `load_silver_data.py` → Loads cleaned silver CSVs (multi-year, 2021, geolocation).
-* `engineer_silver_data.py` → Normalises/aligns, injects region, applies aliases, merges geolocation, and saves the gold CSV.
-* `app.py` → Orchestrates the pipeline end-to-end (silver → gold).
+* `load_silver_data.py` -> Loads cleaned silver CSVs (multi-year, 2021, geolocation).
+* `engineer_silver_data.py` -> Normalises/aligns, injects region, applies aliases, merges geolocation, and saves the gold CSV.
+* `app.py` -> Orchestrates the pipeline end-to-end (silver -> gold).
 
 ## How to Run
 
@@ -81,7 +81,7 @@ From the project root:
 python src/feature_engineering/engineer_silver_data.py
 ```
 
-This executes the **silver → gold** transformation and writes `world_happiness_gold.csv` to `data/gold/`.
+This executes the **silver -> gold** transformation and writes `world_happiness_gold.csv` to `data/gold/`.
 
 ## Output
 
@@ -90,6 +90,6 @@ This executes the **silver → gold** transformation and writes `world_happiness
 
 ## Notes
 
-* This stage completes the medallion flow for the assignment (**silver → gold**).
+* This stage completes the medallion flow for the assignment (**silver -> gold**).
 * The engineering is deliberately robust to small column-name differences via normalisation and aliasing.
 * If you want to include *all* multi-year countries (not just those present in 2021), run with `restrict_multi_to_2021_countries=False` when using the `SilverToGold` class.

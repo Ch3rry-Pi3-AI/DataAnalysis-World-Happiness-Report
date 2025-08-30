@@ -1,5 +1,5 @@
 """
-Silver → Gold transformation for the World Happiness project.
+Silver -> Gold transformation for the World Happiness project.
 
 This module contains helper functions and a SilverToGold class that:
 - normalises and aligns multi-year, 2021-only, and geolocation datasets,
@@ -8,7 +8,7 @@ This module contains helper functions and a SilverToGold class that:
 - and writes engineered CSVs into the 🥇 gold layer.
 
 The goal is to provide a reproducible, teaching-friendly pipeline:
-silver/cleaned → gold/engineered.
+silver/cleaned -> gold/engineered.
 """
 
 # ----------------------------------------------------------------------
@@ -61,7 +61,7 @@ def _build_normalised_map(columns: Iterable[str]) -> Dict[str, str]:
     Returns
     -------
     dict[str, str]
-        Mapping of normalised_name → first-occurring original name.
+        Mapping of normalised_name -> first-occurring original name.
     """
     
     # Start with an empty mapping (normalised_name -> first-seen original column).
@@ -93,8 +93,21 @@ ALIASES: Dict[str, str] = {
 
 def _apply_aliases(df: pd.DataFrame, aliases: Dict[str, str]) -> pd.DataFrame:
     """
-    Use normalised-name aliases to rename columns to canonical targets.
+    Rename DataFrame columns to canonical targets using normalise-name aliases.
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        Input DataFrame with original column names.
+    aliases: dict[str, str]
+        Mapping of normalised_name -> canonical target name.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Copy of the DataFrame with columns renames where aliases apply
     """
+
     # Build a lookup from normalised_name -> original_name for the current DataFrame.
     norm_to_orig = _build_normalised_map(df.columns)
 
@@ -376,7 +389,7 @@ if __name__ == "__main__":
     # Instantiate the transformer (dataclass holds folders and output filename).
     s2g = SilverToGold()
 
-    # Run the end-to-end silver → gold transformation.
+    # Run the end-to-end silver -> gold transformation.
     gold_df = s2g.run(
         multi_df=multi_clean,
         y2021_df=y2021_clean,
