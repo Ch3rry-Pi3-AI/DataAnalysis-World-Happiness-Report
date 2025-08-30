@@ -15,4 +15,7 @@ kagglehub
 
 # Utilities
 python-dotenv               
-requests                    
+requests      
+
+# Notebooks
+ipykernel
