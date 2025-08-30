@@ -30,6 +30,7 @@ from src import (
     BronzeToSilver,             # src/preprocess_data/clean_bronze_data.py
     load_all_silver_data,       # src/feature_engineering/load_silver_data.py
     SilverToGold,               # src/feature_engineering/engineer_silver_data.py
+    load_gold_happiness_data,   # src/eda/load_gold_data.py
 )
 
 
@@ -100,3 +101,10 @@ if __name__ == "__main__":
         save_output=True,
     )
     print("✅ Gold dataset created and saved to 🥇 folder.\n")
+
+    # ------------------------------------------------------------------
+    # Stage 5: Load gold data (same style as bronze loaders)
+    # ------------------------------------------------------------------
+
+    gold_df = load_gold_happiness_data(verbose=True)
+    print("✅ Gold loaded 🥈.\n")

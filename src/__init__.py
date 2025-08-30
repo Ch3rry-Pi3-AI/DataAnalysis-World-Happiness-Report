@@ -6,3 +6,4 @@ from .preprocess_data.load_bronze_data import load_all_bronze_data
 from .preprocess_data.clean_bronze_data import BronzeToSilver
 from .feature_engineering.load_silver_data import load_all_silver_data
 from .feature_engineering.engineer_silver_data import SilverToGold
+from .eda.load_gold_data import load_gold_happiness_data
