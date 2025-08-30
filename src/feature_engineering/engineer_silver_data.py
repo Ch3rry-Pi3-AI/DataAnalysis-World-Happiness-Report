@@ -408,11 +408,10 @@ class SilverToGold:
         # Map geo country labels -> happiness labels 
         geo_to_happy = {
             "Congo [Republic]": "Congo (Brazzaville)",
-            "Congo [DRC]": "Congo (Brazzaville)",  
+            "Congo [DRC]": "Congo (Kinshasa)",             
             "Hong Kong": "Hong Kong S.A.R. of China",
             "Côte d'Ivoire": "Ivory Coast",
             "Myanmar [Burma]": "Myanmar",
-            "Cyprus": "North Cyprus",
             "Macedonia [FYROM]": "North Macedonia",
             "Taiwan": "Taiwan Province of China",
         }
@@ -443,11 +442,14 @@ class SilverToGold:
 
         # Left-join geolocation onto the happiness data.
         merged = appended.merge(
-            geo_renamed,
+            geo_harmonised,
             on="country_name",
             how="left",
             suffixes=("", "_geo"),
         )
+
+        # Drop missing lat/lon rows
+        merged = merged.dropna(subset=["latitude", "longitude"])
 
         if verbose:
             missing_geo = merged["latitude"].isna().sum() if "latitude" in merged.columns else len(merged)

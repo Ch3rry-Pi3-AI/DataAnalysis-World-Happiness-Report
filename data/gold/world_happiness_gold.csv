@@ -391,17 +391,17 @@ Comoros,0.534,-0.121,55.34,3.956,7.988,0.651,Sub-Saharan Africa,0.719,2012,KM,-1
 Comoros,0.56,0.086,57.2,3.973,8.028,0.794,Sub-Saharan Africa,0.621,2018,KM,-11.875001,43.872219
 Comoros,0.538,0.077,57.5,4.609,8.033,0.762,Sub-Saharan Africa,0.632,2019,KM,-11.875001,43.872219
 Comoros,0.548,0.082,57.349,4.289,8.031,0.781,Sub-Saharan Africa,0.626,2021,KM,-11.875001,43.872219
-Congo (Brazzaville),0.526,-0.098,52.2,3.82,8.082,0.785111111111111,Sub-Saharan Africa,0.555,2008,,,
-Congo (Brazzaville),0.745,-0.109,54.58,4.51,8.18,0.833,Sub-Saharan Africa,0.637,2011,,,
-Congo (Brazzaville),0.773,-0.112,54.96,3.919,8.192,0.8,Sub-Saharan Africa,0.622,2012,,,
-Congo (Brazzaville),0.726,-0.078,55.34,3.955,8.201,0.752,Sub-Saharan Africa,0.68,2013,,,
-Congo (Brazzaville),0.662,-0.11,55.72,4.056,8.242,0.808,Sub-Saharan Africa,0.686,2014,,,
-Congo (Brazzaville),0.85,-0.104,56.1,4.691,8.243,0.841,Sub-Saharan Africa,0.642,2015,,,
-Congo (Brazzaville),0.786,-0.072,56.7,4.119,8.19,0.79,Sub-Saharan Africa,0.615,2016,,,
-Congo (Brazzaville),0.778,-0.131,57.3,4.884,8.146,0.763,Sub-Saharan Africa,0.655,2017,,,
-Congo (Brazzaville),0.699,-0.092,57.9,5.49,8.136,0.738,Sub-Saharan Africa,0.621,2018,,,
-Congo (Brazzaville),0.686,-0.046,58.5,5.213,8.101,0.741,Sub-Saharan Africa,0.625,2019,,,
-Congo (Brazzaville),0.695,-0.068,58.221,5.342,8.117,0.745,Sub-Saharan Africa,0.636,2021,,,
+Congo (Brazzaville),0.526,-0.098,52.2,3.82,8.082,0.785111111111111,Sub-Saharan Africa,0.555,2008,CG,-0.228021,15.827659
+Congo (Brazzaville),0.745,-0.109,54.58,4.51,8.18,0.833,Sub-Saharan Africa,0.637,2011,CG,-0.228021,15.827659
+Congo (Brazzaville),0.773,-0.112,54.96,3.919,8.192,0.8,Sub-Saharan Africa,0.622,2012,CG,-0.228021,15.827659
+Congo (Brazzaville),0.726,-0.078,55.34,3.955,8.201,0.752,Sub-Saharan Africa,0.68,2013,CG,-0.228021,15.827659
+Congo (Brazzaville),0.662,-0.11,55.72,4.056,8.242,0.808,Sub-Saharan Africa,0.686,2014,CG,-0.228021,15.827659
+Congo (Brazzaville),0.85,-0.104,56.1,4.691,8.243,0.841,Sub-Saharan Africa,0.642,2015,CG,-0.228021,15.827659
+Congo (Brazzaville),0.786,-0.072,56.7,4.119,8.19,0.79,Sub-Saharan Africa,0.615,2016,CG,-0.228021,15.827659
+Congo (Brazzaville),0.778,-0.131,57.3,4.884,8.146,0.763,Sub-Saharan Africa,0.655,2017,CG,-0.228021,15.827659
+Congo (Brazzaville),0.699,-0.092,57.9,5.49,8.136,0.738,Sub-Saharan Africa,0.621,2018,CG,-0.228021,15.827659
+Congo (Brazzaville),0.686,-0.046,58.5,5.213,8.101,0.741,Sub-Saharan Africa,0.625,2019,CG,-0.228021,15.827659
+Congo (Brazzaville),0.695,-0.068,58.221,5.342,8.117,0.745,Sub-Saharan Africa,0.636,2021,CG,-0.228021,15.827659
 Costa Rica,0.882,0.06,69.94,7.082,9.565,0.798,Latin America and Caribbean,0.937,2006,CR,9.748917,-83.753428
 Costa Rica,0.923,0.098,69.88,7.432,9.63,0.82,Latin America and Caribbean,0.918,2007,CR,9.748917,-83.753428
 Costa Rica,0.912,0.096,69.82,6.851,9.662,0.816,Latin America and Caribbean,0.916,2008,CR,9.748917,-83.753428
@@ -722,18 +722,18 @@ Honduras,0.898,0.072,67.0,6.02,8.624,0.783,Latin America and Caribbean,0.843,201
 Honduras,0.872,0.099,67.2,5.908,8.643,0.804,Latin America and Caribbean,0.827,2018,HN,15.199999,-86.241905
 Honduras,0.846,0.063,67.4,5.93,8.653,0.815,Latin America and Caribbean,0.797,2019,HN,15.199999,-86.241905
 Honduras,0.857,0.081,67.3,5.919,8.648,0.809,Latin America and Caribbean,0.812,2021,HN,15.199999,-86.241905
-Hong Kong S.A.R. of China,0.91,0.156,,5.511,10.746,0.356,East Asia,0.812,2006,,,
-Hong Kong S.A.R. of China,0.922,0.296,,5.137,10.816,0.274,East Asia,0.84,2008,,,
-Hong Kong S.A.R. of China,0.918,0.308,,5.397,10.788,0.272,East Asia,0.835,2009,,,
-Hong Kong S.A.R. of China,0.89,0.332,,5.643,10.847,0.256,East Asia,0.857,2010,,,
-Hong Kong S.A.R. of China,0.894,0.235,,5.474,10.887,0.245,East Asia,0.846,2011,,,
-Hong Kong S.A.R. of China,0.88,0.222,,5.484,10.893,0.38,East Asia,0.826,2012,,,
-Hong Kong S.A.R. of China,0.843,0.224,,5.458,10.94,0.423,East Asia,0.834,2014,,,
-Hong Kong S.A.R. of China,0.8,0.1,,5.498,10.97,0.403,East Asia,0.832,2016,,,
-Hong Kong S.A.R. of China,0.831,0.14,,5.362,11.0,0.416,East Asia,0.831,2017,,,
-Hong Kong S.A.R. of China,0.727,0.067,,5.659,11.0,0.432,East Asia,0.856,2019,,,
-Hong Kong S.A.R. of China,0.705,0.208,,5.295,10.8887,0.38,East Asia,0.813,2020,,,
-Hong Kong S.A.R. of China,0.717,0.067,76.82,5.477,11.0,0.403,East Asia,0.836,2021,,,
+Hong Kong S.A.R. of China,0.91,0.156,,5.511,10.746,0.356,East Asia,0.812,2006,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.922,0.296,,5.137,10.816,0.274,East Asia,0.84,2008,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.918,0.308,,5.397,10.788,0.272,East Asia,0.835,2009,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.89,0.332,,5.643,10.847,0.256,East Asia,0.857,2010,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.894,0.235,,5.474,10.887,0.245,East Asia,0.846,2011,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.88,0.222,,5.484,10.893,0.38,East Asia,0.826,2012,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.843,0.224,,5.458,10.94,0.423,East Asia,0.834,2014,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.8,0.1,,5.498,10.97,0.403,East Asia,0.832,2016,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.831,0.14,,5.362,11.0,0.416,East Asia,0.831,2017,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.727,0.067,,5.659,11.0,0.432,East Asia,0.856,2019,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.705,0.208,,5.295,10.8887,0.38,East Asia,0.813,2020,HK,22.396428,114.109497
+Hong Kong S.A.R. of China,0.717,0.067,76.82,5.477,11.0,0.403,East Asia,0.836,2021,HK,22.396428,114.109497
 Hungary,0.697,-0.1539230769230769,64.6,5.194,10.108,0.903,Central and Eastern Europe,0.93,2005,HU,47.162494,19.503304
 Hungary,0.538,-0.161,65.0,4.954,10.153,0.895,Central and Eastern Europe,0.931,2007,HU,47.162494,19.503304
 Hungary,0.464,-0.125,65.4,4.895,10.097,0.915,Central and Eastern Europe,0.901,2009,HU,47.162494,19.503304
@@ -863,16 +863,16 @@ Italy,0.65,-0.021,73.6,6.517,10.65,0.888,Western Europe,0.913,2018,IT,41.87194,1
 Italy,0.709,-0.082,73.8,6.445,10.655,0.866,Western Europe,0.838,2019,IT,41.87194,12.56738
 Italy,0.718,-0.15,74.0,6.488,10.563,0.844,Western Europe,0.89,2020,IT,41.87194,12.56738
 Italy,0.693,-0.084,73.8,6.483,10.623,0.866,Western Europe,0.88,2021,IT,41.87194,12.56738
-Ivory Coast,0.76,-0.153,45.78,4.197,8.209,0.902,Sub-Saharan Africa,0.667,2009,,,
-Ivory Coast,0.739,-0.031,47.1,3.739,8.274,0.691,Sub-Saharan Africa,0.709,2013,,,
-Ivory Coast,0.781,-0.08,47.4,3.57,8.334,0.671,Sub-Saharan Africa,0.711,2014,,,
-Ivory Coast,0.8,-0.053,47.7,4.445,8.393,0.744,Sub-Saharan Africa,0.704,2015,,,
-Ivory Coast,0.769,-0.043,48.3,4.543,8.437,0.757,Sub-Saharan Africa,0.617,2016,,,
-Ivory Coast,0.732,-0.111,48.9,5.038,8.483,0.771,Sub-Saharan Africa,0.661,2017,,,
-Ivory Coast,0.713,-0.05,49.5,5.268,8.523,0.791,Sub-Saharan Africa,0.621,2018,,,
-Ivory Coast,0.736,-0.017,50.1,5.392,8.564,0.799,Sub-Saharan Africa,0.679,2019,,,
-Ivory Coast,0.77,0.016,50.7,5.257,8.565,0.777,Sub-Saharan Africa,0.613,2020,,,
-Ivory Coast,0.741,-0.016,50.114,5.306,8.551,0.794,Sub-Saharan Africa,0.644,2021,,,
+Ivory Coast,0.76,-0.153,45.78,4.197,8.209,0.902,Sub-Saharan Africa,0.667,2009,CI,7.539989,-5.54708
+Ivory Coast,0.739,-0.031,47.1,3.739,8.274,0.691,Sub-Saharan Africa,0.709,2013,CI,7.539989,-5.54708
+Ivory Coast,0.781,-0.08,47.4,3.57,8.334,0.671,Sub-Saharan Africa,0.711,2014,CI,7.539989,-5.54708
+Ivory Coast,0.8,-0.053,47.7,4.445,8.393,0.744,Sub-Saharan Africa,0.704,2015,CI,7.539989,-5.54708
+Ivory Coast,0.769,-0.043,48.3,4.543,8.437,0.757,Sub-Saharan Africa,0.617,2016,CI,7.539989,-5.54708
+Ivory Coast,0.732,-0.111,48.9,5.038,8.483,0.771,Sub-Saharan Africa,0.661,2017,CI,7.539989,-5.54708
+Ivory Coast,0.713,-0.05,49.5,5.268,8.523,0.791,Sub-Saharan Africa,0.621,2018,CI,7.539989,-5.54708
+Ivory Coast,0.736,-0.017,50.1,5.392,8.564,0.799,Sub-Saharan Africa,0.679,2019,CI,7.539989,-5.54708
+Ivory Coast,0.77,0.016,50.7,5.257,8.565,0.777,Sub-Saharan Africa,0.613,2020,CI,7.539989,-5.54708
+Ivory Coast,0.741,-0.016,50.114,5.306,8.551,0.794,Sub-Saharan Africa,0.644,2021,CI,7.539989,-5.54708
 Jamaica,0.738,-0.004,64.9,6.208,9.225,0.946,Latin America and Caribbean,0.909,2006,JM,18.109581,-77.297508
 Jamaica,0.796,-0.064,66.22,5.374,9.164,0.909,Latin America and Caribbean,0.855,2011,JM,18.109581,-77.297508
 Jamaica,0.793,-0.021,66.46,5.709,9.151,0.931,Latin America and Caribbean,0.865,2013,JM,18.109581,-77.297508
@@ -1246,16 +1246,16 @@ Mozambique,0.823,-0.03,53.2,4.28,7.157,0.682,Sub-Saharan Africa,0.678,2017,MZ,-1
 Mozambique,0.897,0.049,54.2,4.654,7.162,0.691,Sub-Saharan Africa,0.738,2018,MZ,-18.665695,35.529562
 Mozambique,0.87,0.073,55.2,4.932,7.155,0.682,Sub-Saharan Africa,0.742,2019,MZ,-18.665695,35.529562
 Mozambique,0.882,0.061,54.706,4.794,7.158,0.684,Sub-Saharan Africa,0.744,2021,MZ,-18.665695,35.529562
-Myanmar,0.691,0.645,57.02,4.439,8.158,0.695,Southeast Asia,0.612,2012,,,
-Myanmar,0.775,0.689,57.38,4.176,8.23,0.638,Southeast Asia,0.757,2013,,,
-Myanmar,0.8333750000000001,0.698,57.74,4.786,8.299,0.592,Southeast Asia,0.774,2014,,,
-Myanmar,0.808,0.688,58.1,4.224,8.359,0.633,Southeast Asia,0.752,2015,,,
-Myanmar,0.877,0.679,58.4,4.623,8.408,0.607,Southeast Asia,0.793,2016,,,
-Myanmar,0.886,0.65,58.7,4.154,8.464,0.619,Southeast Asia,0.795,2017,,,
-Myanmar,0.906,0.49,59.0,4.411,8.523,0.647,Southeast Asia,0.774,2018,,,
-Myanmar,0.899,0.561,59.3,4.434,8.545,0.682,Southeast Asia,0.763,2019,,,
-Myanmar,0.825,0.47,59.6,4.431,8.554,0.647,Southeast Asia,0.796,2020,,,
-Myanmar,0.876,0.509,59.302,4.426,8.541,0.66,Southeast Asia,0.779,2021,,,
+Myanmar,0.691,0.645,57.02,4.439,8.158,0.695,Southeast Asia,0.612,2012,MM,21.913965,95.956223
+Myanmar,0.775,0.689,57.38,4.176,8.23,0.638,Southeast Asia,0.757,2013,MM,21.913965,95.956223
+Myanmar,0.8333750000000001,0.698,57.74,4.786,8.299,0.592,Southeast Asia,0.774,2014,MM,21.913965,95.956223
+Myanmar,0.808,0.688,58.1,4.224,8.359,0.633,Southeast Asia,0.752,2015,MM,21.913965,95.956223
+Myanmar,0.877,0.679,58.4,4.623,8.408,0.607,Southeast Asia,0.793,2016,MM,21.913965,95.956223
+Myanmar,0.886,0.65,58.7,4.154,8.464,0.619,Southeast Asia,0.795,2017,MM,21.913965,95.956223
+Myanmar,0.906,0.49,59.0,4.411,8.523,0.647,Southeast Asia,0.774,2018,MM,21.913965,95.956223
+Myanmar,0.899,0.561,59.3,4.434,8.545,0.682,Southeast Asia,0.763,2019,MM,21.913965,95.956223
+Myanmar,0.825,0.47,59.6,4.431,8.554,0.647,Southeast Asia,0.796,2020,MM,21.913965,95.956223
+Myanmar,0.876,0.509,59.302,4.426,8.541,0.66,Southeast Asia,0.779,2021,MM,21.913965,95.956223
 Namibia,0.781,-0.101,49.68,4.886,9.059,0.839,Sub-Saharan Africa,0.828,2007,,-22.95764,18.49041
 Namibia,0.849,-0.183,55.16,4.574,9.232,0.79,Sub-Saharan Africa,0.763,2014,,-22.95764,18.49041
 Namibia,0.81,-0.19,56.2,4.441,9.215,0.831,Sub-Saharan Africa,0.828,2017,,-22.95764,18.49041
@@ -1352,28 +1352,20 @@ Nigeria,0.79,-0.01,49.7,5.252,8.548,0.866,Sub-Saharan Africa,0.741,2018,NG,9.081
 Nigeria,0.729,0.032,50.1,4.356,8.544,0.873,Sub-Saharan Africa,0.734,2019,NG,9.081999,8.675277
 Nigeria,0.713,0.099,50.5,5.503,8.484,0.913,Sub-Saharan Africa,0.739,2020,NG,9.081999,8.675277
 Nigeria,0.737,0.037,50.102,4.759,8.533,0.878,Sub-Saharan Africa,0.74,2021,NG,9.081999,8.675277
-North Cyprus,0.693,,,5.463,,0.855,Western Europe,0.871,2012,,,
-North Cyprus,0.775,,,5.567,,0.715,Western Europe,0.869,2013,,,
-North Cyprus,0.83,,,5.786,,0.692,Western Europe,0.802,2014,,,
-North Cyprus,0.785,,,5.843,,0.659,Western Europe,0.791,2015,,,
-North Cyprus,0.796,,,5.827,,0.67,Western Europe,0.808,2016,,,
-North Cyprus,0.797,,,5.608,,0.614,Western Europe,0.837,2018,,,
-North Cyprus,0.793,,,5.467,,0.64,Western Europe,0.803,2019,,,
-North Cyprus,0.795,0.012,73.898,5.536,10.576,0.626,Western Europe,0.82,2021,,,
-North Macedonia,0.439,0.08,64.095,4.494,9.416,0.87,Central and Eastern Europe,0.811,2007,,,
-North Macedonia,0.552,-0.042,64.349,4.428,9.464,0.844,Central and Eastern Europe,0.734,2009,,,
-North Macedonia,0.513,-0.058,64.502,4.18,9.496,0.856,Central and Eastern Europe,0.687,2010,,,
-North Macedonia,0.607,-0.087,64.661,4.898,9.518,0.865,Central and Eastern Europe,0.784,2011,,,
-North Macedonia,0.613,-0.084,64.811,4.64,9.513,0.92,Central and Eastern Europe,0.798,2012,,,
-North Macedonia,0.641,0.025,64.942,5.186,9.541,0.861,Central and Eastern Europe,0.832,2013,,,
-North Macedonia,0.645,0.035,65.053,5.204,9.576,0.861,Central and Eastern Europe,0.793,2014,,,
-North Macedonia,0.66,-0.047,65.145,4.976,9.613,0.824,Central and Eastern Europe,0.766,2015,,,
-North Macedonia,0.706,0.08,65.225,5.346,9.64,0.87,Central and Eastern Europe,0.871,2016,,,
-North Macedonia,0.752,-0.059,65.303,5.234,9.65,0.856,Central and Eastern Europe,0.8,2017,,,
-North Macedonia,0.745,-0.041,65.389,5.24,9.677,0.91,Central and Eastern Europe,0.849,2018,,,
-North Macedonia,0.725,0.024,65.474,5.015,9.711,0.923,Central and Eastern Europe,0.815,2019,,,
-North Macedonia,0.787,0.131,65.56,5.054,9.69,0.877,Central and Eastern Europe,0.75,2020,,,
-North Macedonia,0.751,0.038,65.474,5.101,9.693,0.905,Central and Eastern Europe,0.805,2021,,,
+North Macedonia,0.439,0.08,64.095,4.494,9.416,0.87,Central and Eastern Europe,0.811,2007,MK,41.608635,21.745275
+North Macedonia,0.552,-0.042,64.349,4.428,9.464,0.844,Central and Eastern Europe,0.734,2009,MK,41.608635,21.745275
+North Macedonia,0.513,-0.058,64.502,4.18,9.496,0.856,Central and Eastern Europe,0.687,2010,MK,41.608635,21.745275
+North Macedonia,0.607,-0.087,64.661,4.898,9.518,0.865,Central and Eastern Europe,0.784,2011,MK,41.608635,21.745275
+North Macedonia,0.613,-0.084,64.811,4.64,9.513,0.92,Central and Eastern Europe,0.798,2012,MK,41.608635,21.745275
+North Macedonia,0.641,0.025,64.942,5.186,9.541,0.861,Central and Eastern Europe,0.832,2013,MK,41.608635,21.745275
+North Macedonia,0.645,0.035,65.053,5.204,9.576,0.861,Central and Eastern Europe,0.793,2014,MK,41.608635,21.745275
+North Macedonia,0.66,-0.047,65.145,4.976,9.613,0.824,Central and Eastern Europe,0.766,2015,MK,41.608635,21.745275
+North Macedonia,0.706,0.08,65.225,5.346,9.64,0.87,Central and Eastern Europe,0.871,2016,MK,41.608635,21.745275
+North Macedonia,0.752,-0.059,65.303,5.234,9.65,0.856,Central and Eastern Europe,0.8,2017,MK,41.608635,21.745275
+North Macedonia,0.745,-0.041,65.389,5.24,9.677,0.91,Central and Eastern Europe,0.849,2018,MK,41.608635,21.745275
+North Macedonia,0.725,0.024,65.474,5.015,9.711,0.923,Central and Eastern Europe,0.815,2019,MK,41.608635,21.745275
+North Macedonia,0.787,0.131,65.56,5.054,9.69,0.877,Central and Eastern Europe,0.75,2020,MK,41.608635,21.745275
+North Macedonia,0.751,0.038,65.474,5.101,9.693,0.905,Central and Eastern Europe,0.805,2021,MK,41.608635,21.745275
 Norway,0.96,0.109,71.32,7.416,11.031,0.397,Western Europe,0.959,2006,NO,60.472024,8.468946
 Norway,0.947,0.018,71.56,7.632,11.042,0.503,Western Europe,0.936,2008,NO,60.472024,8.468946
 Norway,0.947,0.147,72.24,7.678,11.017,0.368,Western Europe,0.948,2012,NO,60.472024,8.468946
@@ -1739,20 +1731,20 @@ Switzerland,0.926,0.101,74.1,7.509,11.134,0.301,Western Europe,0.93,2018,CH,46.8
 Switzerland,0.913,0.036,74.4,7.694,11.136,0.294,Western Europe,0.949,2019,CH,46.818188,8.227512
 Switzerland,0.917,-0.064,74.7,7.508,11.081,0.28,Western Europe,0.946,2020,CH,46.818188,8.227512
 Switzerland,0.919,0.025,74.4,7.571,11.117,0.292,Western Europe,0.942,2021,CH,46.818188,8.227512
-Taiwan Province of China,0.63,-0.03,68.68,6.189,10.613,0.846,East Asia,0.882,2006,,,
-Taiwan Province of China,0.642,-0.017,69.14,5.548,10.606,0.785,East Asia,0.83,2008,,,
-Taiwan Province of China,0.677,0.005,69.6,6.229,10.691,0.821,East Asia,0.831,2010,,,
-Taiwan Province of China,0.761,0.035,69.14,6.309,10.705,0.755,East Asia,0.863,2011,,,
-Taiwan Province of China,0.698,0.022,69.14,6.126,10.716,0.803,East Asia,0.825,2012,,,
-Taiwan Province of China,0.69,0.002,69.14,6.34,10.75,0.841,East Asia,0.817,2013,,,
-Taiwan Province of China,0.693,0.092,69.14,6.363,10.798,0.866,East Asia,0.87,2014,,,
-Taiwan Province of China,0.701,0.019,69.14,6.45,10.842,0.857,East Asia,0.885,2015,,,
-Taiwan Province of China,0.719,-0.049,69.14,6.513,10.855,0.811,East Asia,0.895,2016,,,
-Taiwan Province of China,0.76,-0.07,69.14,6.359,10.871,0.743,East Asia,0.891,2017,,,
-Taiwan Province of China,0.741,0.0008999999999999,69.14,6.467,10.7447,0.736,East Asia,0.896,2018,,,
-Taiwan Province of China,0.814,0.0008999999999999,69.14,6.537,10.7447,0.718,East Asia,0.893,2019,,,
-Taiwan Province of China,0.799,0.0008999999999999,69.14,6.751,10.7447,0.711,East Asia,0.901,2020,,,
-Taiwan Province of China,0.784,-0.07,69.6,6.584,10.871,0.721,East Asia,0.898,2021,,,
+Taiwan Province of China,0.63,-0.03,68.68,6.189,10.613,0.846,East Asia,0.882,2006,TW,23.69781,120.960515
+Taiwan Province of China,0.642,-0.017,69.14,5.548,10.606,0.785,East Asia,0.83,2008,TW,23.69781,120.960515
+Taiwan Province of China,0.677,0.005,69.6,6.229,10.691,0.821,East Asia,0.831,2010,TW,23.69781,120.960515
+Taiwan Province of China,0.761,0.035,69.14,6.309,10.705,0.755,East Asia,0.863,2011,TW,23.69781,120.960515
+Taiwan Province of China,0.698,0.022,69.14,6.126,10.716,0.803,East Asia,0.825,2012,TW,23.69781,120.960515
+Taiwan Province of China,0.69,0.002,69.14,6.34,10.75,0.841,East Asia,0.817,2013,TW,23.69781,120.960515
+Taiwan Province of China,0.693,0.092,69.14,6.363,10.798,0.866,East Asia,0.87,2014,TW,23.69781,120.960515
+Taiwan Province of China,0.701,0.019,69.14,6.45,10.842,0.857,East Asia,0.885,2015,TW,23.69781,120.960515
+Taiwan Province of China,0.719,-0.049,69.14,6.513,10.855,0.811,East Asia,0.895,2016,TW,23.69781,120.960515
+Taiwan Province of China,0.76,-0.07,69.14,6.359,10.871,0.743,East Asia,0.891,2017,TW,23.69781,120.960515
+Taiwan Province of China,0.741,0.0008999999999999,69.14,6.467,10.7447,0.736,East Asia,0.896,2018,TW,23.69781,120.960515
+Taiwan Province of China,0.814,0.0008999999999999,69.14,6.537,10.7447,0.718,East Asia,0.893,2019,TW,23.69781,120.960515
+Taiwan Province of China,0.799,0.0008999999999999,69.14,6.751,10.7447,0.711,East Asia,0.901,2020,TW,23.69781,120.960515
+Taiwan Province of China,0.784,-0.07,69.6,6.584,10.871,0.721,East Asia,0.898,2021,TW,23.69781,120.960515
 Tajikistan,0.702,-0.088,60.64,4.613,7.554,0.768,Commonwealth of Independent States,0.724,2006,TJ,38.861034,71.276093
 Tajikistan,0.818,0.0,61.08,4.432,7.609,0.659,Commonwealth of Independent States,0.727,2007,TJ,38.861034,71.276093
 Tajikistan,0.816,0.018,61.52,5.064,7.665,0.723,Commonwealth of Independent States,0.701,2008,TJ,38.861034,71.276093
