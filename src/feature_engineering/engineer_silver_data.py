@@ -49,6 +49,10 @@ def _snake_normalise(name: str) -> str:
     # Return the normalised snake_case string.
     return s
 
+# ----------------------------------------------------------------------
+# Normalised Map (normalised_name -> original column)
+# ----------------------------------------------------------------------
+
 def _build_normalised_map(columns: Iterable[str]) -> Dict[str, str]:
     """
     Build a mapping from normalised names to original column names.
@@ -126,6 +130,9 @@ def _apply_aliases(df: pd.DataFrame, aliases: Dict[str, str]) -> pd.DataFrame:
     # Apply renames if any; otherwise return the DataFrame untouched.
     return df.rename(columns=rename_dict) if rename_dict else df
     
+# ----------------------------------------------------------------------
+# Intersect & Align (harmonise shared columns across DataFrames)
+# ----------------------------------------------------------------------
 
 def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
@@ -183,6 +190,46 @@ def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame
 
     # Return the aligned DataFrames (same columns, same order, same names).
     return a_aligned, b_aligned
+
+# ----------------------------------------------------------------------
+# Column Finder (locate original name from normalised target)
+# ----------------------------------------------------------------------
+
+def _find_col(df: pd.DataFrame, target_norm: str) -> str:
+    """
+    Locate the original column name corresponding to a normalised target.
+
+    Parameters
+    ----------
+
+    df : pandas.DataFrame
+        DataFrame in which to search for the column.
+    target_norm: str
+        Normalised column name to locate (e.g., 'country_name', 'year').
+
+    Returns
+    -------
+    str
+        Original column name present in df that matches the normalised target.
+
+    Raises
+    ------
+    KeyError
+        If no matching column is found in the DataFrame
+    """
+
+    # Build a mapping from normalised_name -> original_name for columns in df.
+    norm_map = _build_normalised_map(df.columns)
+
+    # Scan for the target normalised name and return the original column name when found.
+    for n, orig in norm_map.items():
+        if n == target_norm:
+            return orig
+
+    # If nothing matched, raise a clear error with a helpful hint.
+    raise KeyError(
+        f"Expected a column matching '{target_norm}' (e.g., '{target_norm}' or a close variant)."
+    )
 
 # ----------------------------------------------------------------------
 # Core class
@@ -252,20 +299,6 @@ class SilverToGold:
         # ------------------------------------------------------------------
         # Step 1: Locate key columns robustly by normalised name
         # ------------------------------------------------------------------
-
-        def _find_col(df: pd.DataFrame, target_norm: str) -> str:
-            # Build a mapping from normalised_name -> original_name for columns in df.
-            norm_map = _build_normalised_map(df.columns)
-
-            # Scan for the target normalised name and return the original column name when found.
-            for n, orig in norm_map.items():
-                if n == target_norm:
-                    return orig
-
-            # If nothing matched, raise a clear error with a helpful hint.
-            raise KeyError(
-                f"Expected a column matching '{target_norm}' (e.g., '{target_norm}' or a close variant)."
-            )
 
         multi_country = _find_col(multi_df, "country_name")
         multi_year    = _find_col(multi_df, "year")
