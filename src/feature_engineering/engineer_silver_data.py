@@ -190,6 +190,19 @@ def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame
 
 @dataclass
 class SilverToGold:
+    """
+    Transformer for silver -> gold World Happiness datasets.
+
+    Attributes
+    ----------
+    silver_folder: str
+        Path to the silver layer folder (input).
+    gold_folder: str
+        Path to the gold layer folder (output).
+    engineered_name: str
+        Output CSV filename for the engineered dataset.
+    """
+
     silver_folder: str = "data/silver"
     gold_folder: str = "data/gold"
     engineered_name: str = "world_happiness_gold.csv"
@@ -204,6 +217,37 @@ class SilverToGold:
             verbose: bool = False,
             save_output = True
     ) -> pd.DataFrame:
+        """
+        Execute the silver -> gold transformation.
+
+        Parameters
+        ----------
+        multi_df: pandas.DataFrame
+            Cleaned multi-year dataset from the silver layer.
+        y2021_df: pandas.DataFrame
+            Cleaned 2021-only dataset from the silver layer.
+        geo_df: pandas.DataFrame
+            Cleaned geolocation dataset (contains latitude/longitude)
+        restrict_multi_to_2021_countries: bool, optional
+            If True, multi_df is filtered to only comprise countries present
+            in y2021_df (default: True)
+        verbose: bool, optional
+            If True, print progress information (default: False).
+        save_ouput: bool, optional
+            If True, save the engineered DataFrame to gold folder (default: True)
+
+        Returns
+        -------
+        pandas.DataFrame
+            Engineered (gold) DataFrame with aligned columns and geolocation merged.
+
+        Raises
+        ------
+        KeyError
+            If required columns (by normalised names) cannot be located.
+        ValueError
+            If no shared columns remain after intersection/alignment.
+        """    
 
         # ------------------------------------------------------------------
         # Step 1: Locate key columns robustly by normalised name
