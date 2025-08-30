@@ -1,5 +1,5 @@
 """
-Bronze → Silver cleaning for the World Happiness project.
+Bronze -> Silver cleaning for the World Happiness project.
 
 This module contains helper functions and a BronzeToSilver class that:
 - standardises column names,
@@ -8,7 +8,7 @@ This module contains helper functions and a BronzeToSilver class that:
 - and writes cleaned CSVs into the 🥈 silver layer.
 
 The goal is to provide a reproducible, teaching-friendly pipeline:
-bronze/raw → silver/cleaned.
+bronze/raw -> silver/cleaned.
 """
 
 # ----------------------------------------------------------------------
@@ -32,8 +32,8 @@ def _to_snake_case(name: str) -> str:
 
     Examples
     --------
-    'Country Name' → 'country_name'
-    'regionalIndicator' → 'regional_indicator'
+    'Country Name' -> 'country_name'
+    'regionalIndicator' -> 'regional_indicator'
     """
 
     # Trim whitespace
@@ -107,7 +107,7 @@ def _ensure_dir(path: Path) -> None:
 @dataclass
 class BronzeToSilver:
     """
-    Cleaner for bronze → silver World Happiness datasets.
+    Cleaner for bronze -> silver World Happiness datasets.
 
     Provides methods to:
     - standardise and clean the multi-year and 2021 datasets,
@@ -436,12 +436,12 @@ if __name__ == "__main__":
         if not p.exists():
             raise FileNotFoundError(f"Missing {label} bronze file at: {p.resolve()}")
 
-    # Load → clean
+    # Load -> clean
     multi_clean = cleaner.clean_multi_year(pd.read_csv(paths["multi"]))
     y2021_clean = cleaner.clean_y2021(pd.read_csv(paths["y2021"]))
     geo_clean = cleaner.clean_geolocation(pd.read_csv(paths["geo"]))
 
-    # Save → silver
+    # Save -> silver
     cleaner.save_multi(multi_clean)
     cleaner.save_y2021(y2021_clean)
     cleaner.save_geolocation(geo_clean)

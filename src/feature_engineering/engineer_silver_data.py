@@ -1,5 +1,5 @@
 """
-Silver → Gold transformation for the World Happiness project.
+Silver -> Gold transformation for the World Happiness project.
 
 This module contains helper functions and a SilverToGold class that:
 - normalises and aligns multi-year, 2021-only, and geolocation datasets,
@@ -8,7 +8,7 @@ This module contains helper functions and a SilverToGold class that:
 - and writes engineered CSVs into the 🥇 gold layer.
 
 The goal is to provide a reproducible, teaching-friendly pipeline:
-silver/cleaned → gold/engineered.
+silver/cleaned -> gold/engineered.
 """
 
 # ----------------------------------------------------------------------
@@ -49,6 +49,10 @@ def _snake_normalise(name: str) -> str:
     # Return the normalised snake_case string.
     return s
 
+# ----------------------------------------------------------------------
+# Normalised Map (normalised_name -> original column)
+# ----------------------------------------------------------------------
+
 def _build_normalised_map(columns: Iterable[str]) -> Dict[str, str]:
     """
     Build a mapping from normalised names to original column names.
@@ -61,7 +65,7 @@ def _build_normalised_map(columns: Iterable[str]) -> Dict[str, str]:
     Returns
     -------
     dict[str, str]
-        Mapping of normalised_name → first-occurring original name.
+        Mapping of normalised_name -> first-occurring original name.
     """
     
     # Start with an empty mapping (normalised_name -> first-seen original column).
@@ -93,8 +97,21 @@ ALIASES: Dict[str, str] = {
 
 def _apply_aliases(df: pd.DataFrame, aliases: Dict[str, str]) -> pd.DataFrame:
     """
-    Use normalised-name aliases to rename columns to canonical targets.
+    Rename DataFrame columns to canonical targets using normalise-name aliases.
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        Input DataFrame with original column names.
+    aliases: dict[str, str]
+        Mapping of normalised_name -> canonical target name.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Copy of the DataFrame with columns renames where aliases apply
     """
+
     # Build a lookup from normalised_name -> original_name for the current DataFrame.
     norm_to_orig = _build_normalised_map(df.columns)
 
@@ -113,12 +130,34 @@ def _apply_aliases(df: pd.DataFrame, aliases: Dict[str, str]) -> pd.DataFrame:
     # Apply renames if any; otherwise return the DataFrame untouched.
     return df.rename(columns=rename_dict) if rename_dict else df
     
+# ----------------------------------------------------------------------
+# Intersect & Align (harmonise shared columns across DataFrames)
+# ----------------------------------------------------------------------
 
 def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Intersect columns between `a` and `b` using normalised names.
-    Returns aligned copies with identical column order/names.
+    Intersect columns between two DataFrames using normalised names
+    and return aligned copies with identical column order and names.
+
+    Parameters
+    ----------
+    a : pandas.DataFrame
+        First DataFrame.
+    b : pandas.DataFrame
+        Second DataFrame
+
+    Returns
+    -------
+    (pandas.DataFrame, pandas.DataFrame)
+        Two DataFrames restricted to shared columns, with identical names
+        and column order.
+
+    Raises
+    ------
+    ValueError
+        If no shared columns remain after normalisation. 
     """
+
     # Build normalised_name -> original_name maps for both DataFrames.
     a_map = _build_normalised_map(a.columns)
     b_map = _build_normalised_map(b.columns)
@@ -153,11 +192,64 @@ def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame
     return a_aligned, b_aligned
 
 # ----------------------------------------------------------------------
+# Column Finder (locate original name from normalised target)
+# ----------------------------------------------------------------------
+
+def _find_col(df: pd.DataFrame, target_norm: str) -> str:
+    """
+    Locate the original column name corresponding to a normalised target.
+
+    Parameters
+    ----------
+
+    df : pandas.DataFrame
+        DataFrame in which to search for the column.
+    target_norm: str
+        Normalised column name to locate (e.g., 'country_name', 'year').
+
+    Returns
+    -------
+    str
+        Original column name present in df that matches the normalised target.
+
+    Raises
+    ------
+    KeyError
+        If no matching column is found in the DataFrame
+    """
+
+    # Build a mapping from normalised_name -> original_name for columns in df.
+    norm_map = _build_normalised_map(df.columns)
+
+    # Scan for the target normalised name and return the original column name when found.
+    for n, orig in norm_map.items():
+        if n == target_norm:
+            return orig
+
+    # If nothing matched, raise a clear error with a helpful hint.
+    raise KeyError(
+        f"Expected a column matching '{target_norm}' (e.g., '{target_norm}' or a close variant)."
+    )
+
+# ----------------------------------------------------------------------
 # Core class
 # ----------------------------------------------------------------------
 
 @dataclass
 class SilverToGold:
+    """
+    Transformer for silver -> gold World Happiness datasets.
+
+    Attributes
+    ----------
+    silver_folder: str
+        Path to the silver layer folder (input).
+    gold_folder: str
+        Path to the gold layer folder (output).
+    engineered_name: str
+        Output CSV filename for the engineered dataset.
+    """
+
     silver_folder: str = "data/silver"
     gold_folder: str = "data/gold"
     engineered_name: str = "world_happiness_gold.csv"
@@ -172,24 +264,41 @@ class SilverToGold:
             verbose: bool = False,
             save_output = True
     ) -> pd.DataFrame:
+        """
+        Execute the silver -> gold transformation.
+
+        Parameters
+        ----------
+        multi_df: pandas.DataFrame
+            Cleaned multi-year dataset from the silver layer.
+        y2021_df: pandas.DataFrame
+            Cleaned 2021-only dataset from the silver layer.
+        geo_df: pandas.DataFrame
+            Cleaned geolocation dataset (contains latitude/longitude)
+        restrict_multi_to_2021_countries: bool, optional
+            If True, multi_df is filtered to only comprise countries present
+            in y2021_df (default: True)
+        verbose: bool, optional
+            If True, print progress information (default: False).
+        save_ouput: bool, optional
+            If True, save the engineered DataFrame to gold folder (default: True)
+
+        Returns
+        -------
+        pandas.DataFrame
+            Engineered (gold) DataFrame with aligned columns and geolocation merged.
+
+        Raises
+        ------
+        KeyError
+            If required columns (by normalised names) cannot be located.
+        ValueError
+            If no shared columns remain after intersection/alignment.
+        """    
 
         # ------------------------------------------------------------------
         # Step 1: Locate key columns robustly by normalised name
         # ------------------------------------------------------------------
-
-        def _find_col(df: pd.DataFrame, target_norm: str) -> str:
-            # Build a mapping from normalised_name -> original_name for columns in df.
-            norm_map = _build_normalised_map(df.columns)
-
-            # Scan for the target normalised name and return the original column name when found.
-            for n, orig in norm_map.items():
-                if n == target_norm:
-                    return orig
-
-            # If nothing matched, raise a clear error with a helpful hint.
-            raise KeyError(
-                f"Expected a column matching '{target_norm}' (e.g., '{target_norm}' or a close variant)."
-            )
 
         multi_country = _find_col(multi_df, "country_name")
         multi_year    = _find_col(multi_df, "year")
@@ -376,7 +485,7 @@ if __name__ == "__main__":
     # Instantiate the transformer (dataclass holds folders and output filename).
     s2g = SilverToGold()
 
-    # Run the end-to-end silver → gold transformation.
+    # Run the end-to-end silver -> gold transformation.
     gold_df = s2g.run(
         multi_df=multi_clean,
         y2021_df=y2021_clean,
