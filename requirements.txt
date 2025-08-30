@@ -3,6 +3,7 @@ pandas
 numpy                       
 
 # Visualisation / App
+matplotlib
 plotly                      
 dash                        
 dash-bootstrap-components   
