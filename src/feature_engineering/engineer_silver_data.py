@@ -268,14 +268,10 @@ class SilverToGold:
         
         # Combine the aligned multi-year and 2021 DataFrames into a single table.
         union = pd.concat([multi_aligned, y2021_aligned], ignore_index=True)
-        # Append the two aligned DataFrames.
-        union = pd.concat([multi_aligned, y2021_aligned], ignore_index=True) 
 
         # Build the set of (country_name, year) keys that originate from the 2021 dataset.
-        # Build a set of (country_name, year) keys that correspond to the 2021 dataset.
         y2021_keys = set(zip(
             # Cast country to str on both sides to avoid type mismatches in tuple comparisons.
-            # Cast country to str on both sides to avoid type mismatches during comparison.
             y2021_aligned["country_name"].astype(str),
             y2021_aligned["year"],
         ))
@@ -283,26 +279,18 @@ class SilverToGold:
         # Create (country_name, year) key and flag for whether that key exists in the 2021 set.
         union["_is_2021_row"] = list(zip(union["country_name"].astype(str), union["year"]))
         union["_is_2021_row"] = union["_is_2021_row"].isin(y2021_keys).astype(int)
-        # Flag rows that came from the 2021 dataset using the (country, year) key.
-        union["_is_2021_row"] = list(zip(union["country_name"].astype(str), union["year"]))     # key per row
-        union["_is_2021_row"] = union["_is_2021_row"].isin(y2021_keys).astype(int)              # 1 = from 2021, 0 = otherwise
 
         # Sort so non-2021 rows (0) come first and 2021 rows (1) come last.
         appended = (
-            
-            # Sort so that non-2021 rows appear before 2021 rows within each (country, year) ...
-            union.sort_values(["country_name", "year", "_is_2021_row"])  # 0 before 1
-                 
-                 # ... then keep the *last* one—this gives precedence to the 2021 record...
-                 .drop_duplicates(["country_name", "year"], keep="last")  
-                 .drop(columns=["_is_2021_row"])
-
-                 # ... resulting in a clean, contiguous index  
-                 .reset_index(drop=True)  
+            union.sort_values(["country_name", "year", "_is_2021_row"])   # 0 before 1
+                 .drop_duplicates(["country_name", "year"], keep="last")  # keep the 2021 row if present
+                 .drop(columns=["_is_2021_row"])                          # remove helper flag
+                 .reset_index(drop=True)                                  # tidy index
         )
 
         if verbose:
             print(f"Appended DataFrame shape: {appended.shape}\n")
+
 
         # ------------------------------------------------------------------
         # Step 7: harmonise geo country names to match happiness names
@@ -345,17 +333,12 @@ class SilverToGold:
         geo_renamed = geo_df.rename(columns={geo_country: "country_name"})
 
         # Left-join geolocation onto the happiness data.
-        # Standardise the geo country column name so it matches the merge key.
-        geo_renamed = geo_df.rename(columns={geo_country: "country_name"}) 
-
-        # Left-join geolocation onto the happiness data.
         merged = appended.merge(
             geo_renamed,
             on="country_name",
             how="left",
             suffixes=("", "_geo"),
         )
-
 
         if verbose:
             missing_geo = merged["latitude"].isna().sum() if "latitude" in merged.columns else len(merged)
@@ -367,21 +350,13 @@ class SilverToGold:
         # ------------------------------------------------------------------
 
         # Ensure the gold output directory exists (create parents if needed).
-        # Ensure the gold output directory exists (create parents if needed).
         out_dir = Path(self.gold_folder)
         out_dir.mkdir(parents=True, exist_ok=True)
 
         # Compose the full output path and write the engineered dataset as CSV (no row index).
-        out_dir.mkdir(parents=True, exist_ok=True) 
-
-        # Compose the full output path. 
         out_path = out_dir / self.engineered_name
         merged.to_csv(out_path, index=False)
         
-
-        # Write the engineered dataset as CSV.
-        merged.to_csv(out_path, index=False) 
-
         if verbose:
             print(f"Saved gold dataset: {out_path.resolve()}\n")
 
@@ -391,25 +366,15 @@ class SilverToGold:
 # ----------------------------------------------------------------------
 # Script Entry Point (quick smoke run)
 # ----------------------------------------------------------------------
-# ----------------------------------------------------------------------
-# Script Entry Point (quick smoke run)
-# ----------------------------------------------------------------------
 
 if __name__ == "__main__":
     
     # Load inputs from the silver layer (helper returns 3 DataFrames).
-
-    # Import a convenience loader that returns all three silver-layer DataFrames.
     from load_silver_data import load_all_silver_data
-
-    # Load cleaned inputs from the 🥈 silver layer (prints shapes if verbose=True).
     multi_clean, y2021_clean, geo_clean = load_all_silver_data(verbose=True)
 
     # Instantiate the transformer (dataclass holds folders and output filename).
-    # Instantiate the transformer with default folders and output filename.
     s2g = SilverToGold()
-
-    # Run the end-to-end silver → gold transformation.
 
     # Run the end-to-end silver → gold transformation.
     gold_df = s2g.run(
@@ -418,7 +383,6 @@ if __name__ == "__main__":
         geo_df=geo_clean,
         restrict_multi_to_2021_countries=True,
         verbose=True,
-        save_output=True,
         save_output=True,
     )
 
