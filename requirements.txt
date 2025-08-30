@@ -4,6 +4,7 @@ numpy
 
 # Visualisation / App
 matplotlib
+seaborn
 plotly                      
 dash                        
 dash-bootstrap-components   
