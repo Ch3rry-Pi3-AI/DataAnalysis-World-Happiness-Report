@@ -1,4 +1,4 @@
-# Data Preprocessing – Bronze → Silver
+# Data Preprocessing – Bronze -> Silver
 
 This branch of the project is focused on **loading the bronze datasets** and **cleaning them** into the silver layer.
 The following three datasets are cleaned individually in this stage, preparing them for merging in the upcoming feature engineering stage:
@@ -31,9 +31,9 @@ project-root/
     └── silver/    # cleaned outputs        🆕
 ```
 
-* `load_bronze_data.py` → Loads all bronze CSVs (multi-year, 2021, geolocation) into pandas DataFrames.
-* `clean_bronze_data.py` → Cleans each DataFrame (standardises columns, imputes missing values, validates coordinates, etc.) and saves them to the silver folder.
-* `app.py` → Updated to run the full pipeline: download bronze → load bronze → clean → save silver.
+* `load_bronze_data.py` -> Loads all bronze CSVs (multi-year, 2021, geolocation) into pandas DataFrames.
+* `clean_bronze_data.py` -> Cleans each DataFrame (standardises columns, imputes missing values, validates coordinates, etc.) and saves them to the silver folder.
+* `app.py` -> Updated to run the full pipeline: download bronze -> load bronze -> clean -> save silver.
 
 ## How to Run
 
