@@ -84,6 +84,73 @@ class EDAExplorer:
         print(missing.to_frame(name="missing"))
         return missing.to_frame(name="missing")
 
+    def histograms(
+        self,
+        columns: Optional[Sequence[str]] = None,
+        exclude: Optional[Sequence[str]] = None,
+        bins: int = 30,
+    ) -> None:
+        """Plot histograms for numeric columns (or a subset)."""
+        num_cols = list(self.df.select_dtypes(include="number").columns)
+        if exclude:
+            ex = set(exclude)
+            num_cols = [c for c in num_cols if c not in ex]
+
+        cols = [c for c in (columns or num_cols) if c in self.df.columns]
+        if not cols:
+            print("No numeric columns selected.")
+            return
+
+        n = len(cols)
+        ncols = 3
+        nrows = (n + ncols - 1) // ncols
+
+        fig, axes = plt.subplots(
+            nrows=nrows, ncols=ncols,
+            figsize=(4 * ncols, 2.8 * nrows),
+        )
+        axes = axes.ravel() if n > 1 else [axes]
+
+        for ax, col in zip(axes, cols):
+            sns.histplot(self.df[col].dropna(), bins=bins, ax=ax)
+            ax.set_title(col)
+
+        for ax in axes[len(cols):]:
+            ax.axis("off")
+
+        fig.suptitle("Numeric distributions", y=1.02)
+        plt.tight_layout()
+
+
+    def boxplots(
+        self,
+        columns: Optional[Sequence[str]] = None,
+        exclude: Optional[Sequence[str]] = None,
+        showfliers: bool = True,
+    ) -> None:
+        """Horizontal boxplots for numeric columns, with optional exclusion."""
+        num_cols = list(self.df.select_dtypes(include="number").columns)
+        if exclude:
+            ex = set(exclude)
+            num_cols = [c for c in num_cols if c not in ex]
+
+        cols = [c for c in (columns or num_cols) if c in self.df.columns]
+        if not cols:
+            print("No numeric columns selected")
+            return
+
+        # Long-form for reliable horizontal layout
+        df_long = self.df[cols].melt(var_name="Feature", value_name="Value").dropna(subset=["Value"])
+
+        fig_h = max(3, 0.45 * len(cols) + 1.5)  # taller if many features
+        fig, ax = plt.subplots(figsize=(8, fig_h))
+        sns.boxplot(data=df_long, x="Value", y="Feature", order=cols, showfliers=showfliers, ax=ax)
+        ax.set_title("Boxplots (horizontal)")
+        ax.set_xlabel("Value")
+        ax.set_ylabel("")
+
+        plt.tight_layout()
+        plt.show()
 
 if __name__ == "__main__":
 
