@@ -129,9 +129,28 @@ def _apply_aliases(df: pd.DataFrame, aliases: Dict[str, str]) -> pd.DataFrame:
 
 def _intersect_and_align(a: pd.DataFrame, b: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Intersect columns between `a` and `b` using normalised names.
-    Returns aligned copies with identical column order/names.
+    Intersect columns between two DataFrames using normalised names
+    and return aligned copies with identical column order and names.
+
+    Parameters
+    ----------
+    a : pandas.DataFrame
+        First DataFrame.
+    b : pandas.DataFrame
+        Second DataFrame
+
+    Returns
+    -------
+    (pandas.DataFrame, pandas.DataFrame)
+        Two DataFrames restricted to shared columns, with identical names
+        and column order.
+
+    Raises
+    ------
+    ValueError
+        If no shared columns remain after normalisation. 
     """
+
     # Build normalised_name -> original_name maps for both DataFrames.
     a_map = _build_normalised_map(a.columns)
     b_map = _build_normalised_map(b.columns)
