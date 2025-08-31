@@ -50,7 +50,7 @@ class EDAConfig:
     style: str = "whitegrid"
     context: str = "notebook"
     fig_dpi: int = 110
-    palette: Optional[str] = "viridis"
+    palette: Optional[str] = None
     use_theme: bool = True
 
 # ----------------------------------------------------------------------
