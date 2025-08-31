@@ -44,41 +44,43 @@ class EDAExplorer:
     # Step 1: Summary Statics
     # ------------------------------------------------------------------
 
-    def preview(self, n: int = 5) -> None:
+    def preview(self, n: int = 5, console: bool = True) -> None:
         """Show head and tail."""
         print(f"\nFirst {n} rows\n")
-        print(self.df.head(n))
+        if console:
+            print(self.df.head(n))
+        else:
+            display(self.df.head(n))
+
         print(f"\nLast {n} rows\n")
-        print(self.df.tail(n))
+        if console:
+            print(self.df.tail(n))
+        else:
+            display(self.df.tail(n))
+        
 
     def info(self) -> None:
         """Print shape, dtypes, memory usage, and basic null summary."""
         print("\nShape:\n")
         print(self.df.shape)
 
-        print("\nDtypes:\n")
+        print("\nDtypes:")
         print(self.df.dtypes.sort_index())
 
         memory_mb = self.df.memory_usage(deep=True).sum() / (1024 ** 2)
         print(f"\nMemory usage: {memory_mb:,.2f} MB\n")
 
-        na = self.df.isna().sum().sort_values(ascending=False)
-        na = na[na > 0]
-        if not na.empty:
-            print("Missing values\n")
-            print(na)
-        else:
-            print("No missing values detected.")
-
-    def describe_numeric(self, exclude: Optional[Sequence[str]] = None) -> pd.DataFrame:
+    def describe_numeric(self, exclude: Optional[Sequence[str]] = None, console: bool = True) -> pd.DataFrame:
         """Return numeric summary, excluding specific columns."""
         num = self._select_numeric(columns=None, exclude=exclude)
         if num.empty:
             print("No numeric columns to describe after exclusion.")
             return pd.DataFrame()
         desc = num.describe().T
-        print(desc)
-        return desc
+        if console:
+            print(desc)
+        else:
+            display(desc)
     
     def describe_categorical(self, top_n: int = 10) -> pd.DataFrame:
         """Show top frequencies for object/category columns."""
@@ -129,31 +131,28 @@ class EDAExplorer:
         columns: Optional[Sequence[str]] = None,
         exclude: Optional[Sequence[str]] = None,
         bins: int = 30,
-        save_artifact: bool = True
     ) -> None:
         """Plot histograms for numeric columns (or a subset)."""
-        num_cols = list(self.df.select_dtypes(include="number").columns)
-        if exclude:
-            ex = set(exclude)
-            num_cols = [c for c in num_cols if c not in ex]
-
-        cols = [c for c in (columns or num_cols) if c in self.df.columns]
-        if not cols:
+        num = self._select_numeric(columns=columns, exclude=exclude)
+        if num.empty:
             print("No numeric columns selected.")
             return
 
+        cols = list(num.columns)
         n = len(cols)
         ncols = 3
         nrows = (n + ncols - 1) // ncols
 
         fig, axes = plt.subplots(
-            nrows=nrows, ncols=ncols,
+            nrows=nrows,
+            ncols=ncols,
             figsize=(4 * ncols, 3 * nrows),
+            dpi=self.config.fig_dpi,
         )
         axes = axes.ravel() if n > 1 else [axes]
 
         for ax, col in zip(axes, cols):
-            sns.histplot(self.df[col].dropna(), bins=bins, ax=ax)
+            sns.histplot(num[col].dropna(), bins=bins, ax=ax)
             ax.set_title(col)
 
         for ax in axes[len(cols):]:
@@ -161,104 +160,97 @@ class EDAExplorer:
 
         fig.suptitle("Numeric distributions", y=1.02)
         plt.tight_layout()
-        if hasattr(self, "_finalise") and save_artifact:
-            self._finalise(fig, "histograms.png")
-        
-        plt.show()
+        self._finalise(fig, "histograms.png")
 
     def boxplots(
         self,
         columns: Optional[Sequence[str]] = None,
         exclude: Optional[Sequence[str]] = None,
         showfliers: bool = True,
-        save_artifact: bool = True
     ) -> None:
         """Horizontal boxplots for numeric columns, with optional exclusion."""
-        num_cols = list(self.df.select_dtypes(include="number").columns)
-        if exclude:
-            ex = set(exclude)
-            num_cols = [c for c in num_cols if c not in ex]
-
-        cols = [c for c in (columns or num_cols) if c in self.df.columns]
-        if not cols:
-            print("No numeric columns selected")
+        num = self._select_numeric(columns=columns, exclude=exclude)
+        if num.empty:
+            print("No numeric columns selected.")
             return
 
-        df_long = self.df[cols].melt(var_name="Feature", value_name="Value").dropna(subset=["Value"])
+        cols = list(num.columns)
+        df_long = num.melt(var_name="Feature", value_name="Value").dropna(subset=["Value"])
 
-        fig_h = max(3, 0.45 * len(cols) + 1.5) 
-        fig, ax = plt.subplots(figsize=(8, fig_h))
+        fig_h = max(3, 0.45 * len(cols) + 1.5)
+        fig, ax = plt.subplots(figsize=(8, fig_h), dpi=self.config.fig_dpi)
         sns.boxplot(data=df_long, x="Value", y="Feature", order=cols, showfliers=showfliers, ax=ax)
         ax.set_title("Boxplots (horizontal)")
         ax.set_xlabel("Value")
         ax.set_ylabel("")
-
         plt.tight_layout()
-        if hasattr(self, "_finalise") and save_artifact:
-            self._finalise(fig, "boxplots.png")
-        
-        plt.show()
+        self._finalise(fig, "boxplots.png")
 
     def correlations(
-            self, 
-            method: str = "pearson", 
-            top_k: Optional[int] = None,
-            save_artifact: bool = True            
+        self,
+        method: str = "pearson",
+        top_k: Optional[int] = None,
     ) -> pd.DataFrame:
-        """Compute and (optionally) plot a correlation heatmap for numeric columns."""
+        """Compute and plot a correlation heatmap for numeric columns."""
         num_df = self.df.select_dtypes(include="number")
-        if top_k is not None and top_k < len(num_df.columns):
-            # keep columns with largest variance to reduce clutter
-            variances = num_df.var().sort_values(ascending=False)
+        if num_df.empty:
+            print("No numeric columns available for correlation.")
+            return pd.DataFrame()
+
+        if top_k is not None and 0 < top_k < len(num_df.columns):
+            variances = num_df.var(numeric_only=True).sort_values(ascending=False)
             keep = variances.head(top_k).index
             num_df = num_df[keep]
 
-        corr = num_df.corr(method=method)
+        corr = num_df.corr(method=method, numeric_only=True)
         if corr.empty:
             print("No numeric correlations to plot.")
             return corr
 
-        fig, ax = plt.subplots(figsize=(0.6 * len(corr.columns) + 3, 0.6 * len(corr.columns) + 1.5))
+        size = 0.6 * len(corr.columns) + 3
+        fig, ax = plt.subplots(figsize=(size, size), dpi=self.config.fig_dpi)
         sns.heatmap(corr, cmap="coolwarm", center=0, annot=False, linewidths=0.5, ax=ax)
         ax.set_title(f"Correlation heatmap ({method})")
         plt.tight_layout()
-        if hasattr(self, "_finalise") and save_artifact:
-            self._finalise(fig, f"correlations_{method}.png")
-        plt.show()
+        self._finalise(fig, f"correlations_{method}.png")
+        return corr
         
     def geo_scatter(
-            self, 
-            hue: Optional[str] = None, 
-            alpha: float = 0.8, 
-            s: int = 40,
-            save_artifact: bool = True
+        self,
+        hue: Optional[str] = None,
+        alpha: float = 0.8,
+        s: int = 40,
     ) -> None:
         """Very simple lat/long scatter (no basemap), to eyeball coverage."""
         if self.lat_col not in self.df.columns or self.lon_col not in self.df.columns:
             print(f"Latitude/longitude not found (expected '{self.lat_col}', '{self.lon_col}').")
             return
 
-        plot_df = self.df[[self.lat_col, self.lon_col] + ([hue] if hue and hue in self.df.columns else [])].dropna()
+        cols = [self.lat_col, self.lon_col]
+        if hue and hue in self.df.columns:
+            cols.append(hue)
+
+        plot_df = self.df[cols].dropna()
         if plot_df.empty:
             print("No rows with latitude/longitude to plot.")
             return
 
-        fig, ax = plt.subplots(figsize=(8, 4.5))
+        fig, ax = plt.subplots(figsize=(8, 4.5), dpi=self.config.fig_dpi)
         if hue and hue in plot_df.columns:
             sns.scatterplot(
-                data=plot_df, x=self.lon_col, y=self.lat_col, hue=hue, s=s, edgecolor="none", alpha=alpha, ax=ax
+                data=plot_df,
+                x=self.lon_col, y=self.lat_col,
+                hue=hue, s=s, edgecolor="none", alpha=alpha, ax=ax,
             )
             ax.legend(title=hue, bbox_to_anchor=(1.02, 1), loc="upper left")
         else:
             ax.scatter(plot_df[self.lon_col], plot_df[self.lat_col], s=s, alpha=alpha)
+
         ax.set_title("Geographic scatter (lon vs lat)")
         ax.set_xlabel(self.lon_col)
         ax.set_ylabel(self.lat_col)
         plt.tight_layout()
-        if hasattr(self, "_finalise") and save_artifact:
-            self._finalise(fig, "geo_scatter.png")
-        else:
-            plt.show()
+        self._finalise(fig, "geo_scatter.png")
     
     # ------------------------------------------------------------------
     # Step 3: Helpers
