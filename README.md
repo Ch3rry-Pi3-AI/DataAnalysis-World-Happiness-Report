@@ -102,5 +102,3 @@ eda.geo_scatter(hue="ladder_score")
 * `EDAExplorer` works on a defensive copy of the DataFrame (EDA is non-destructive).
 * Styling uses seaborn; you can opt into `sns.set_theme()` via `EDAConfig(use_theme=True)`.
 * Methods that *display* content typically print/plot rather than return tables; this keeps the notebook flow simple and more aesthetic.
-
-
