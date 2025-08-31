@@ -188,48 +188,90 @@ class EDAExplorer:
 
     
     def describe_categorical(self, top_n: int = 10, console: bool = True) -> pd.DataFrame:
-        """Show top frequencies for object/category columns."""
+        """
+        Summarise top value frequencies for object/category columns.
+        
+        Parameters
+        ----------
+        top_n: int, optional
+            Top N values to show per column (default: 10).
+        console : bool, optional
+            If True, print to console; otherwise, return DataFrame.
+
+        Returns
+        -------
+        pandas.DataFrame or None
+            Returns a summary table when 'console=False', else prints.
+        """
+        
+        # Identify object and category columns.
         cats = self.df.select_dtypes(include=["object", "category"]).columns
         if len(cats) == 0:
             print("No categorical/object columns found.")
             return pd.DataFrame()
-
+        
+        # Build a list of columns (column, value, count).
         rows: List[dict] = []
         for col in cats:
             vc = self.df[col].value_counts(dropna=False).head(top_n)
             for val, cnt in vc.items():
                 rows.append({"column": col, "value": val, "count": int(cnt)})
 
+        # Convert to DataFrame
         out = pd.DataFrame(rows)
         if out.empty:
             print("No categorical frequencies to show.")
             return out
 
-        # nice ordering
+        # Sort by column (ascending) then count (descending)
         out = out.sort_values(["column", "count"], ascending=[True, False], ignore_index=True)
+        
+        # Print to console or display for notebook.
         if console:
             print(out)
         else:
             return out
     
     def missing(self, plot: bool = True) -> pd.DataFrame:
-        """Tabulate missing values; optionally plot a horizontal bar chart."""
+        """
+        Tabulate missing values; optionally plot a horizontal bar chart.
+        
+        Parameters
+        ----------
+        plot: bool, optional
+            If True, show/save a horizontal bar chart; else, returns a table.
+
+        Returns
+        -------
+        pandas.DataFrame or None
+            Table with counts when 'console=False'; else, None.
+        """
+
+        # Compute NA counts per column, sorted by missing value count.
         missing = self.df.isna().sum().sort_values(ascending=False)
         missing = missing[missing > 0]
+
+        # If 'plot=True' and DataFrame is not empty.
         if plot and not missing.empty:
+
+            # Height set to scale with number of missing columns.
             fig, ax = plt.subplots(
                 figsize=(8, max(1.8, 0.3 * len(missing))),
                 dpi=self.config.fig_dpi,
             )
+
+            # Output simple  horizontal bar chart.
             missing.sort_values().plot.barh(ax=ax)
             ax.set_title("Missing values by column")
             ax.set_xlabel("Count")
             ax.set_ylabel("")
-            self._finalise(fig, "missing.png")
-        else:
-            return missing.to_frame(name="missing")
 
-        
+            # Save/show bar chart.
+            self._finalise(fig, "missing.png")
+
+        # Otherwise return a tidy table.
+        return missing.to_frame(name="missing")
+
     # ------------------------------------------------------------------
     # Step 2: Plots
     # ------------------------------------------------------------------
@@ -240,17 +282,32 @@ class EDAExplorer:
         exclude: Optional[Sequence[str]] = None,
         bins: int = 30,
     ) -> None:
-        """Plot histograms for numeric columns (or a subset)."""
+        """
+        Plot histograms for numeric columns (or a filtered subset).
+
+        Parameters
+        ----------
+        columns : Sequence[str] or None, optional
+            Inclusion list of columns to plot. If None, use all numeric columns.
+        exclude : Sequence[str] or None, optional
+            Columns to exclude prior to plotting.
+        bins : int, optional
+            Number of bins for each histogram (default 30).
+        """
+
+        # Select numeric columns with include/exclude filters. 
         num = self._select_numeric(columns=columns, exclude=exclude)
         if num.empty:
             print("No numeric columns selected.")
             return
 
+        # Compute grid to hold subplots
         cols = list(num.columns)
         n = len(cols)
         ncols = 3
         nrows = (n + ncols - 1) // ncols
 
+        # Allocate a figure with enough room for all histograms.
         fig, axes = plt.subplots(
             nrows=nrows,
             ncols=ncols,
@@ -259,13 +316,16 @@ class EDAExplorer:
         )
         axes = axes.ravel() if n > 1 else [axes]
 
+        # Generate each histogram in its own axis.
         for ax, col in zip(axes, cols):
             sns.histplot(num[col].dropna(), bins=bins, ax=ax)
             ax.set_title(col)
 
+        # Hide leftover axes    
         for ax in axes[len(cols):]:
             ax.axis("off")
 
+        # Add supertitle and save/show plot
         fig.suptitle("Numeric distributions", y=1.02)
         plt.tight_layout()
         self._finalise(fig, "histograms.png")
@@ -274,20 +334,37 @@ class EDAExplorer:
         self,
         columns: Optional[Sequence[str]] = None,
         exclude: Optional[Sequence[str]] = None,
-        showfliers: bool = True,
+        show_outliers: bool = True,
     ) -> None:
-        """Horizontal boxplots for numeric columns, with optional exclusion."""
+        """
+        Draw horizontal boxplots for numeric columns (optionally filtered).
+
+        Parameters
+        ----------
+        columns : Sequence[str] or None, optional
+            Inclusion list of columns to plot. If None, use all numeric columns.
+        exclude : Sequence[str] or None, optional
+            Columns to exclude prior to plotting.
+        show_outliers : bool, optional
+            Whether to show outliers (default: True)
+        """
+
+        # Select numeric subset.
         num = self._select_numeric(columns=columns, exclude=exclude)
         if num.empty:
             print("No numeric columns selected.")
             return
 
+        # Melt to long format: Feature, Value.
         cols = list(num.columns)
         df_long = num.melt(var_name="Feature", value_name="Value").dropna(subset=["Value"])
 
+        # Height scales with the number of features.
         fig_h = max(3, 0.45 * len(cols) + 1.5)
         fig, ax = plt.subplots(figsize=(8, fig_h), dpi=self.config.fig_dpi)
-        sns.boxplot(data=df_long, x="Value", y="Feature", order=cols, showfliers=showfliers, ax=ax)
+
+        # Draw plot containing the boxplots.
+        sns.boxplot(data=df_long, x="Value", y="Feature", order=cols, showfliers=show_outliers, ax=ax)
         ax.set_title("Boxplots (horizontal)")
         ax.set_xlabel("Value")
         ax.set_ylabel("")
@@ -299,24 +376,45 @@ class EDAExplorer:
         method: str = "pearson",
         top_k: Optional[int] = None,
     ) -> pd.DataFrame:
-        """Compute and plot a correlation heatmap for numeric columns."""
+        """
+        Compute and plot a correlation heatmap for numeric columns.
+        
+        Parameters
+        ----------
+        method : {"pearson", "spearman", "kendall"}, optional
+            Correlation method to use (default: "pearson")
+        top_k : int or None, optional
+            If provided, keep only the top 'k' columns by variance.
+
+        Returns
+        -------
+        pandas.DataFrame
+            The correlation matrix for plotting.
+        """
+
+        # Work on numeric-only subset.
         num_df = self.df.select_dtypes(include="number")
         if num_df.empty:
             print("No numeric columns available for correlation.")
             return pd.DataFrame()
 
+        # Optional variance-based pruning to declutter heatmap.
         if top_k is not None and 0 < top_k < len(num_df.columns):
             variances = num_df.var(numeric_only=True).sort_values(ascending=False)
             keep = variances.head(top_k).index
             num_df = num_df[keep]
 
+        # Compute correlation
         corr = num_df.corr(method=method, numeric_only=True)
         if corr.empty:
             print("No numeric correlations to plot.")
             return corr
 
+        # Size heatmap relative to number of features.
         size = 0.6 * len(corr.columns) + 3
         fig, ax = plt.subplots(figsize=(size, size), dpi=self.config.fig_dpi)
+
+        # Create heatmap with diverging palette.
         sns.heatmap(corr, cmap="coolwarm", center=0, annot=False, linewidths=0.5, ax=ax)
         ax.set_title(f"Correlation heatmap ({method})")
         plt.tight_layout()
@@ -328,21 +426,39 @@ class EDAExplorer:
         alpha: float = 0.8,
         s: int = 40,
     ) -> None:
-        """Very simple lat/long scatter (no basemap), to eyeball coverage."""
+        """
+        Very simple lat/long scatter (no basemap), to eyeball coverage.
+        
+        Parameters
+        ----------
+        hue : str or None, optional
+            Optional column name to colour points by.
+        alpha : float, optional
+            Alter transparency (default: 0.8)
+        s : int, optional
+            Marker size (default: 40)
+        """
+
+        # Ensure the expected geolocation columns exist.
         if self.lat_col not in self.df.columns or self.lon_col not in self.df.columns:
             print(f"Latitude/longitude not found (expected '{self.lat_col}', '{self.lon_col}').")
             return
 
+        # Build a minimal DataFrame for plotting
         cols = [self.lat_col, self.lon_col]
         if hue and hue in self.df.columns:
             cols.append(hue)
-
         plot_df = self.df[cols].dropna()
+
+        # If no rows have valid coordinates
         if plot_df.empty:
             print("No rows with latitude/longitude to plot.")
             return
 
+        # Create the scatterplot figure
         fig, ax = plt.subplots(figsize=(8, 4.5), dpi=self.config.fig_dpi)
+        
+        # Use seaborn when hue column is provided.
         if hue and hue in plot_df.columns:
             sns.scatterplot(
                 data=plot_df,
