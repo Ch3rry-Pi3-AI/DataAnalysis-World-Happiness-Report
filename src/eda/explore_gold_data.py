@@ -58,7 +58,20 @@ class EDAConfig:
 # ----------------------------------------------------------------------
 
 class EDAExplorer:
-    """Lightweight EDA helper for the Gold World Happiness dataset."""
+    """
+    Lightweight EDA helper for the Gold World Happiness dataset.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The gold dataset to explore (copied internally)
+    config : EDAConfig or None, optional
+        Configuration for styling and saving (default: 'EDAConfig()')
+    lat_col : str, optional
+        Latitude column name for simple geo plots (default: "latitude")
+    lon_col : str, optional
+        Longitude column name for simple geo plots (default: "longitude")
+    """
 
     def __init__(
         self,
@@ -67,18 +80,28 @@ class EDAExplorer:
         lat_col: str = "latitude",
         lon_col: str = "longitude",
     ) -> None:
+        
+        # Keep defensive copy so EDA never mutates caller's DataFrame. 
         self.df = df.copy()
+
+        # Initialise configuration and geolocation columns
         self.config = config or EDAConfig()
         self.lat_col = lat_col
         self.lon_col = lon_col
 
+
+        # Apply seaborn styling/context (teaching-friendly, consistent visuals).
+        if self.config.use_theme:
+            sns.set_theme()
         sns.set_style(self.config.style)
         sns.set_context(self.config.context)
+
+        # Try to set a named palette if provided; keep defaults if invalid.
         if self.config.palette:
             try:
                 sns.set_palette(self.config.palette)
             except Exception:
-                # if invalid palette name, keep seaborn default
+                # If invalid palette name, keep seaborn default.
                 pass
     
     # ------------------------------------------------------------------
