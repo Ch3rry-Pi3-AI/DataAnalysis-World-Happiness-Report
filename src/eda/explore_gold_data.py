@@ -89,7 +89,7 @@ class EDAExplorer:
         print(out)
         return out
     
-    def missing(self, plot: bool = True) -> pd.DataFrame:
+    def missing(self, plot: bool = True, save_artifact=True) -> pd.DataFrame:
         """Tabulate missing values; optionally plot a horizontal bar chart"""
         missing = self.df.isna().sum().sort_values(ascending=False)
         missing = missing[missing > 0]
@@ -101,15 +101,17 @@ class EDAExplorer:
             missing.sort_values().plot.barh(ax=ax)
             ax.set_title("Missing values by column")
             ax.set_xlabel("Count")
-            self._finalise(fig, "missing.png")
-        print(missing.to_frame(name="missing"))
-        return missing.to_frame(name="missing")
+            if hasattr(self, "_finalise") and save_artifact:
+                self._finalise(fig, "missing.png")
+            plt.show()
+
 
     def histograms(
         self,
         columns: Optional[Sequence[str]] = None,
         exclude: Optional[Sequence[str]] = None,
         bins: int = 30,
+        save_artifact: bool = True
     ) -> None:
         """Plot histograms for numeric columns (or a subset)."""
         num_cols = list(self.df.select_dtypes(include="number").columns)
@@ -128,7 +130,7 @@ class EDAExplorer:
 
         fig, axes = plt.subplots(
             nrows=nrows, ncols=ncols,
-            figsize=(4 * ncols, 2.8 * nrows),
+            figsize=(4 * ncols, 3 * nrows),
         )
         axes = axes.ravel() if n > 1 else [axes]
 
@@ -141,6 +143,10 @@ class EDAExplorer:
 
         fig.suptitle("Numeric distributions", y=1.02)
         plt.tight_layout()
+        if hasattr(self, "_finalise") and save_artifact:
+            self._finalise(fig, "histograms.png")
+        
+        plt.show()
 
 
     def boxplots(
@@ -148,6 +154,7 @@ class EDAExplorer:
         columns: Optional[Sequence[str]] = None,
         exclude: Optional[Sequence[str]] = None,
         showfliers: bool = True,
+        save_artifact: bool = True
     ) -> None:
         """Horizontal boxplots for numeric columns, with optional exclusion."""
         num_cols = list(self.df.select_dtypes(include="number").columns)
@@ -160,10 +167,9 @@ class EDAExplorer:
             print("No numeric columns selected")
             return
 
-        # Long-form for reliable horizontal layout
         df_long = self.df[cols].melt(var_name="Feature", value_name="Value").dropna(subset=["Value"])
 
-        fig_h = max(3, 0.45 * len(cols) + 1.5)  # taller if many features
+        fig_h = max(3, 0.45 * len(cols) + 1.5) 
         fig, ax = plt.subplots(figsize=(8, fig_h))
         sns.boxplot(data=df_long, x="Value", y="Feature", order=cols, showfliers=showfliers, ax=ax)
         ax.set_title("Boxplots (horizontal)")
@@ -171,9 +177,17 @@ class EDAExplorer:
         ax.set_ylabel("")
 
         plt.tight_layout()
+        if hasattr(self, "_finalise") and save_artifact:
+            self._finalise(fig, "boxplots.png")
+        
         plt.show()
 
-    def correlations(self, method: str = "pearson", top_k: Optional[int] = None) -> pd.DataFrame:
+    def correlations(
+            self, 
+            method: str = "pearson", 
+            top_k: Optional[int] = None,
+            save_artifact: bool = True            
+    ) -> pd.DataFrame:
         """Compute and (optionally) plot a correlation heatmap for numeric columns."""
         num_df = self.df.select_dtypes(include="number")
         if top_k is not None and top_k < len(num_df.columns):
@@ -191,9 +205,18 @@ class EDAExplorer:
         sns.heatmap(corr, cmap="coolwarm", center=0, annot=False, linewidths=0.5, ax=ax)
         ax.set_title(f"Correlation heatmap ({method})")
         plt.tight_layout()
-        return corr
-    
-    def geo_scatter(self, hue: Optional[str] = None, alpha: float = 0.8, s: int = 40) -> None:
+        if hasattr(self, "_finalise") and save_artifact:
+            self._finalise(fig, f"correlations_{method}.png")
+        plt.show()
+        
+    def geo_scatter(
+            self, 
+            hue: Optional[str] = None, 
+            alpha: 
+            float = 0.8, 
+            s: int = 40,
+            save_artifact: bool = True
+    ) -> None:
         """Very simple lat/long scatter (no basemap), to eyeball coverage."""
         if self.lat_col not in self.df.columns or self.lon_col not in self.df.columns:
             print(f"Latitude/longitude not found (expected '{self.lat_col}', '{self.lon_col}').")
@@ -216,6 +239,11 @@ class EDAExplorer:
         ax.set_xlabel(self.lon_col)
         ax.set_ylabel(self.lat_col)
         plt.tight_layout()
+        if hasattr(self, "_finalise") and save_artifact:
+            self._finalise(fig, "geo_scatter.png")
+        else:
+            plt.show()
+
 
     def _finalise(self, fig: plt.figure, filename: str) -> None:
         """Show or save figure depending on config."""
@@ -224,6 +252,7 @@ class EDAExplorer:
             out_path = self.config.save_dir / filename
             fig.savefig(out_path, bbox_inches="tight")
             print(f"Saved: {out_path}")
+            plt.show()
             plt.close()
         else:
             plt.show()
