@@ -17,7 +17,7 @@ class EDAExplorer:
         
         self.df = df.copy()
         self.lat_col = lat_col
-        self.lat_col = lon_col
+        self.lon_col = lon_col
 
     def preview(self, n: int = 5) -> None:
         """Show head and tail"""
@@ -151,6 +151,50 @@ class EDAExplorer:
 
         plt.tight_layout()
         plt.show()
+
+    def correlations(self, method: str = "pearson", top_k: Optional[int] = None) -> pd.DataFrame:
+        """Compute and (optionally) plot a correlation heatmap for numeric columns."""
+        num_df = self.df.select_dtypes(include="number")
+        if top_k is not None and top_k < len(num_df.columns):
+            # keep columns with largest variance to reduce clutter
+            variances = num_df.var().sort_values(ascending=False)
+            keep = variances.head(top_k).index
+            num_df = num_df[keep]
+
+        corr = num_df.corr(method=method)
+        if corr.empty:
+            print("No numeric correlations to plot.")
+            return corr
+
+        fig, ax = plt.subplots(figsize=(0.6 * len(corr.columns) + 3, 0.6 * len(corr.columns) + 1.5))
+        sns.heatmap(corr, cmap="coolwarm", center=0, annot=False, linewidths=0.5, ax=ax)
+        ax.set_title(f"Correlation heatmap ({method})")
+        plt.tight_layout()
+        return corr
+    
+    def geo_scatter(self, hue: Optional[str] = None, alpha: float = 0.8, s: int = 40) -> None:
+        """Very simple lat/long scatter (no basemap), to eyeball coverage."""
+        if self.lat_col not in self.df.columns or self.lon_col not in self.df.columns:
+            print(f"Latitude/longitude not found (expected '{self.lat_col}', '{self.lon_col}').")
+            return
+
+        plot_df = self.df[[self.lat_col, self.lon_col] + ([hue] if hue and hue in self.df.columns else [])].dropna()
+        if plot_df.empty:
+            print("No rows with latitude/longitude to plot.")
+            return
+
+        fig, ax = plt.subplots(figsize=(8, 4.5))
+        if hue and hue in plot_df.columns:
+            sns.scatterplot(
+                data=plot_df, x=self.lon_col, y=self.lat_col, hue=hue, s=s, edgecolor="none", alpha=alpha, ax=ax
+            )
+            ax.legend(title=hue, bbox_to_anchor=(1.02, 1), loc="upper left")
+        else:
+            ax.scatter(plot_df[self.lon_col], plot_df[self.lat_col], s=s, alpha=alpha)
+        ax.set_title("Geographic scatter (lon vs lat)")
+        ax.set_xlabel(self.lon_col)
+        ax.set_ylabel(self.lat_col)
+        plt.tight_layout()
 
 if __name__ == "__main__":
 
