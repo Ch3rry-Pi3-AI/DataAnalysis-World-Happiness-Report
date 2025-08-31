@@ -1,23 +1,41 @@
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Optional, Sequence
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-class EDAExplorer:
+@dataclass
+class EDAConfig:
+    """Simple configuration for EDA output."""
+    save_dir: Optional[Path] = None
+    style: str = "whitegrid"
+    context: str = "notebook"
+    fig_dpi: int = 110
+    palette: Optional[str] = None 
 
+class EDAExplorer:
+    """Lightweight EDA helper for the Gold World Happiness dataset."""
     def __init__(
             self,
             df: pd.DataFrame,
+            config: Optional[EDAConfig] = None,
             lat_col: str = "latitude",
             lon_col: str = "longitude"
     ) -> None:
         
         self.df = df.copy()
+        self.config = config or EDAConfig()
         self.lat_col = lat_col
         self.lon_col = lon_col
+
+        sns.set_style(self.config.style)
+        sns.set_context(self.config.context)
+        if self.config.palette:
+            try:
+                sns.set_palette(self.config.palette)
+            except:
+                pass
 
     def preview(self, n: int = 5) -> None:
         """Show head and tail"""
@@ -72,15 +90,18 @@ class EDAExplorer:
         return out
     
     def missing(self, plot: bool = True) -> pd.DataFrame:
+        """Tabulate missing values; optionally plot a horizontal bar chart"""
         missing = self.df.isna().sum().sort_values(ascending=False)
         missing = missing[missing > 0]
         if plot and not missing.empty:
             fig, ax = plt.subplots(
-                figsize = (8, 0.3 * len(missing))
+                figsize = (8, 0.3 * len(missing)),
+                dpi = self.config.fig_dpi
             )
             missing.sort_values().plot.barh(ax=ax)
             ax.set_title("Missing values by column")
             ax.set_xlabel("Count")
+            self._finalise(fig, "missing.png")
         print(missing.to_frame(name="missing"))
         return missing.to_frame(name="missing")
 
@@ -195,6 +216,17 @@ class EDAExplorer:
         ax.set_xlabel(self.lon_col)
         ax.set_ylabel(self.lat_col)
         plt.tight_layout()
+
+    def _finalise(self, fig: plt.figure, filename: str) -> None:
+        """Show or save figure depending on config."""
+        if self.config.save_dir:
+            self.config.save_dir.mkdir(parents=True, exist_ok=True)
+            out_path = self.config.save_dir / filename
+            fig.savefig(out_path, bbox_inches="tight")
+            print(f"Saved: {out_path}")
+            plt.close()
+        else:
+            plt.show()
 
 if __name__ == "__main__":
 
