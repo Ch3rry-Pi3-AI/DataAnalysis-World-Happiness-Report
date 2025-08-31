@@ -1,20 +1,61 @@
+"""
+Exploratory Data Analysis helpers for the Gold World Happiness dataset.
+
+This module provides a lightweight, teaching-friendly EDA utility with:
+- concise preview/summary helpers,
+- common plots (histograms, boxplots, correlations, simple geo scatter),
+- and a small configuration object to control seaborn/matplotlib styling.
+
+The emphasis is readability and intent — comments explain *why* each step exists.
+"""
+
+# ----------------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------------
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Sequence, List
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# ----------------------------------------------------------------------
+# Configuration (style, saving, figure quality)
+# ----------------------------------------------------------------------
 
 @dataclass
 class EDAConfig:
-    """Simple configuration for EDA output."""
-    save_dir: Optional[Path] = None     # if set, figures are saved here; otherwise shown
+    """
+    Simple configuration for EDA output.
+    
+    Parameters
+    ----------
+    save_dir:pathlib.Path or None, optional
+        If provided, figures are saved into this folder; otherwise they are shown.
+    style: str, optional
+        Seaborn style name, e.g., "whitegrid" (default).
+    context: str, optional
+        Seaborn context, e.g., "notebook" (default).
+    fig_dpi: int, optional
+        Figure DPI for saved/shown images (default 110).
+    palette: str or None, optional
+        Optional seaborn palette name (e.g., "mako", "viridis"). If invalid, the default
+        is seaborn palette is kept.
+    use_theme: bool, optional
+        If True, call 'sns.set_theme()' for modern seaborn defaults (default True).
+    """
+
+    save_dir: Optional[Path] = None
     style: str = "whitegrid"
     context: str = "notebook"
     fig_dpi: int = 110
-    palette: Optional[str] = None       # e.g. "mako", "viridis"
+    palette: Optional[str] = "viridis"
+    use_theme: bool = True
+
+# ----------------------------------------------------------------------
+# Core Explorer
+# ----------------------------------------------------------------------
 
 class EDAExplorer:
     """Lightweight EDA helper for the Gold World Happiness dataset."""
@@ -82,7 +123,7 @@ class EDAExplorer:
         else:
             display(desc)
     
-    def describe_categorical(self, top_n: int = 10) -> pd.DataFrame:
+    def describe_categorical(self, top_n: int = 10, console: bool = True) -> pd.DataFrame:
         """Show top frequencies for object/category columns."""
         cats = self.df.select_dtypes(include=["object", "category"]).columns
         if len(cats) == 0:
@@ -102,8 +143,10 @@ class EDAExplorer:
 
         # nice ordering
         out = out.sort_values(["column", "count"], ascending=[True, False], ignore_index=True)
-        print(out)
-        return out
+        if console:
+            print(out)
+        else:
+            return out
     
     def missing(self, plot: bool = True) -> pd.DataFrame:
         """Tabulate missing values; optionally plot a horizontal bar chart."""
@@ -119,7 +162,8 @@ class EDAExplorer:
             ax.set_xlabel("Count")
             ax.set_ylabel("")
             self._finalise(fig, "missing.png")
-        return missing.to_frame(name="missing")
+        else:
+            return missing.to_frame(name="missing")
 
         
     # ------------------------------------------------------------------
@@ -213,7 +257,6 @@ class EDAExplorer:
         ax.set_title(f"Correlation heatmap ({method})")
         plt.tight_layout()
         self._finalise(fig, f"correlations_{method}.png")
-        return corr
         
     def geo_scatter(
         self,
