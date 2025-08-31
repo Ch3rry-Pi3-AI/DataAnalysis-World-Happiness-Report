@@ -1,29 +1,31 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Optional, Sequence
+from typing import Optional, Sequence, List
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 @dataclass
 class EDAConfig:
     """Simple configuration for EDA output."""
-    save_dir: Optional[Path] = None
+    save_dir: Optional[Path] = None     # if set, figures are saved here; otherwise shown
     style: str = "whitegrid"
     context: str = "notebook"
     fig_dpi: int = 110
-    palette: Optional[str] = None 
+    palette: Optional[str] = None       # e.g. "mako", "viridis"
 
 class EDAExplorer:
     """Lightweight EDA helper for the Gold World Happiness dataset."""
+
     def __init__(
-            self,
-            df: pd.DataFrame,
-            config: Optional[EDAConfig] = None,
-            lat_col: str = "latitude",
-            lon_col: str = "longitude"
+        self,
+        df: pd.DataFrame,
+        config: Optional[EDAConfig] = None,
+        lat_col: str = "latitude",
+        lon_col: str = "longitude",
     ) -> None:
-        
         self.df = df.copy()
         self.config = config or EDAConfig()
         self.lat_col = lat_col
@@ -34,77 +36,93 @@ class EDAExplorer:
         if self.config.palette:
             try:
                 sns.set_palette(self.config.palette)
-            except:
+            except Exception:
+                # if invalid palette name, keep seaborn default
                 pass
+    
+    # ------------------------------------------------------------------
+    # Step 1: Summary Statics
+    # ------------------------------------------------------------------
 
     def preview(self, n: int = 5) -> None:
-        """Show head and tail"""
+        """Show head and tail."""
         print(f"\nFirst {n} rows\n")
         print(self.df.head(n))
         print(f"\nLast {n} rows\n")
         print(self.df.tail(n))
-        
+
     def info(self) -> None:
-        """Print shape, dtypes, memory usage, and basic null summary"""
+        """Print shape, dtypes, memory usage, and basic null summary."""
         print("\nShape:\n")
         print(self.df.shape)
+
         print("\nDtypes:\n")
         print(self.df.dtypes.sort_index())
 
         memory_mb = self.df.memory_usage(deep=True).sum() / (1024 ** 2)
-        print(f"Memory usage: {memory_mb} MB\n")
+        print(f"\nMemory usage: {memory_mb:,.2f} MB\n")
 
         na = self.df.isna().sum().sort_values(ascending=False)
-        print("Missing values\n")
-        print(na[na > 0])
+        na = na[na > 0]
+        if not na.empty:
+            print("Missing values\n")
+            print(na)
+        else:
+            print("No missing values detected.")
 
-    def describe_numeric(
-            self, 
-            exclude: Optional[Sequence[str]] = None
-    ) -> pd.DataFrame:
-        """Return numeric summary, excluding specific columns"""
-
-        exclude = set(exclude or [])
-
-        num = self.df.select_dtypes(include="number")
-        num = num.drop(columns=[c for c in exclude if c in num.columns], errors="ignore")
-
+    def describe_numeric(self, exclude: Optional[Sequence[str]] = None) -> pd.DataFrame:
+        """Return numeric summary, excluding specific columns."""
+        num = self._select_numeric(columns=None, exclude=exclude)
         if num.empty:
             print("No numeric columns to describe after exclusion.")
-
+            return pd.DataFrame()
         desc = num.describe().T
         print(desc)
         return desc
     
     def describe_categorical(self, top_n: int = 10) -> pd.DataFrame:
-        "Show top frequencies for object/category columns"
-
+        """Show top frequencies for object/category columns."""
         cats = self.df.select_dtypes(include=["object", "category"]).columns
-        rows = []
+        if len(cats) == 0:
+            print("No categorical/object columns found.")
+            return pd.DataFrame()
+
+        rows: List[dict] = []
         for col in cats:
             vc = self.df[col].value_counts(dropna=False).head(top_n)
-            for index, count in vc.items():
-                rows.append({"column": col, "value": index, "count": int(count)})
+            for val, cnt in vc.items():
+                rows.append({"column": col, "value": val, "count": int(cnt)})
+
         out = pd.DataFrame(rows)
+        if out.empty:
+            print("No categorical frequencies to show.")
+            return out
+
+        # nice ordering
+        out = out.sort_values(["column", "count"], ascending=[True, False], ignore_index=True)
         print(out)
         return out
     
-    def missing(self, plot: bool = True, save_artifact=True) -> pd.DataFrame:
-        """Tabulate missing values; optionally plot a horizontal bar chart"""
+    def missing(self, plot: bool = True) -> pd.DataFrame:
+        """Tabulate missing values; optionally plot a horizontal bar chart."""
         missing = self.df.isna().sum().sort_values(ascending=False)
         missing = missing[missing > 0]
         if plot and not missing.empty:
             fig, ax = plt.subplots(
-                figsize = (8, 0.3 * len(missing)),
-                dpi = self.config.fig_dpi
+                figsize=(8, max(1.8, 0.3 * len(missing))),
+                dpi=self.config.fig_dpi,
             )
             missing.sort_values().plot.barh(ax=ax)
             ax.set_title("Missing values by column")
             ax.set_xlabel("Count")
-            if hasattr(self, "_finalise") and save_artifact:
-                self._finalise(fig, "missing.png")
-            plt.show()
+            ax.set_ylabel("")
+            self._finalise(fig, "missing.png")
+        return missing.to_frame(name="missing")
 
+        
+    # ------------------------------------------------------------------
+    # Step 2: Plots
+    # ------------------------------------------------------------------
 
     def histograms(
         self,
@@ -147,7 +165,6 @@ class EDAExplorer:
             self._finalise(fig, "histograms.png")
         
         plt.show()
-
 
     def boxplots(
         self,
@@ -212,8 +229,7 @@ class EDAExplorer:
     def geo_scatter(
             self, 
             hue: Optional[str] = None, 
-            alpha: 
-            float = 0.8, 
+            alpha: float = 0.8, 
             s: int = 40,
             save_artifact: bool = True
     ) -> None:
@@ -243,7 +259,25 @@ class EDAExplorer:
             self._finalise(fig, "geo_scatter.png")
         else:
             plt.show()
+    
+    # ------------------------------------------------------------------
+    # Step 3: Helpers
+    # ------------------------------------------------------------------
 
+    def _select_numeric(
+            self,
+            columns: Optional[Sequence[str]] = None,
+            exclude: Optional[Sequence[str]] = None,
+    ) -> pd.DataFrame:
+        """Return numeric subset after applying optional include/exclude filters."""
+        num = self.df.select_dtypes(include="number")
+        if exclude:
+            ex = set(exclude)
+            num = num[[c for c in num.columns if c not in ex]]
+        if columns:
+            keep = [c for c in columns if c in num.columns]
+            num = num[keep]
+        return num
 
     def _finalise(self, fig: plt.figure, filename: str) -> None:
         """Show or save figure depending on config."""
@@ -256,16 +290,3 @@ class EDAExplorer:
             plt.close()
         else:
             plt.show()
-
-if __name__ == "__main__":
-
-    from load_gold_data import load_gold_happiness_data
-
-    gold_df = load_gold_happiness_data()
-
-    exp = EDAExplorer(df = gold_df)
-    exp.preview()
-    exp.info()
-    exp.describe_numeric(exclude=["year", "latitude", "longitude"])
-    exp.describe_categorical()
-    exp.missing(plot=False)
