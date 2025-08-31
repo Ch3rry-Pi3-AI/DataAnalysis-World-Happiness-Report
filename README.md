@@ -38,8 +38,8 @@ project-root/
 │   │   ├── __init__.py                      
 │   │   ├── load_silver_data.py              
 │   │   └── engineer_silver_data.py          
-│   ├── eda/
-│   │   ├── __init__.py                      🆕 (NEW)
+│   ├── eda/                                 🆕 (NEW)
+│   │   ├── __init__.py                      🆕 
 │   │   ├── load_gold_data.py                🆕
 │   │   └── explore_gold_data.py             🆕
 ├── eda/                                     🆕
@@ -57,6 +57,50 @@ project-root/
     └── geo_scatter.png                      🆕
 ```
 
-* ``
-* ``
-* ``
+* `load_gold_data.py` -> Loads `data/gold/world_happiness_gold.csv` into a DataFrame. 
+* `explore_gold_data.py` -> `EDAExplorer` with preview/describe/missingness/plots; configurable via `EDAConfig` (style, DPI, palette, optional `sns.set_theme`).
+* `eda_notebook.ipynb` -> Natural entrypoint: demonstrates the helpers and writes PNGs to `artifacts/`.
+
+## Notebook
+The notebook `eda_notebook.ipynb` is contained in the `notebooks/` folder. The main code comprises:
+
+```python
+from pathlib import Path
+from src.eda.load_gold_data import load_gold_happiness_data
+from src.eda.explore_gold_data import EDAExplorer, EDAConfig
+
+# Load gold dataset
+gold_df = load_gold_happiness_data()
+
+# Configure EDA (save figures to artifacts/)
+cfg = EDAConfig(save_dir=Path("artifacts"), use_theme=True, fig_dpi=110)
+eda = EDAExplorer(gold_df, config=cfg, lat_col="latitude", lon_col="longitude")
+
+# Quick looks
+eda.preview(n=5)
+eda.info()
+eda.describe_numeric()
+eda.describe_categorical(console=True)
+
+# Data quality and distributions
+eda.missing(plot=True)
+eda.histograms(bins=30)
+eda.boxplots(show_outliers=True)
+
+# Relationships and geography
+eda.correlations(method="pearson", top_k=20)
+eda.geo_scatter(hue="ladder_score")
+```
+> **Note**: The notebook contains additional code to ensure that imports resolve to the project root.
+
+## Output
+* **PNG figures** in `artifacts/` (created automatically when plotting):
+  * `missing.png`, `histograms.png`, `blowplots.png`, `correlations_<method>.png`, `geo_scatter.png`.
+* **Console summaries** in the notebook (shape, dtypes, memory usage, numeric/categorical summaries).
+
+## Notes
+* `EDAExplorer` works on a defensive copy of the DataFrame (EDA is non-destructive).
+* Styling uses seaborn; you can opt into `sns.set_theme()` via `EDAConfig(use_theme=True)`.
+* Methods that *display* content typically print/plot rather than return tables; this keeps the notebook flow simple and more aesthetic.
+
+
