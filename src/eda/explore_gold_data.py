@@ -484,18 +484,49 @@ class EDAExplorer:
             columns: Optional[Sequence[str]] = None,
             exclude: Optional[Sequence[str]] = None,
     ) -> pd.DataFrame:
-        """Return numeric subset after applying optional include/exclude filters."""
+        """
+        Return numeric subset after applying optional include/exclude filters.
+        
+        Parameters
+        ----------
+        columns : Sequence[str] or None, optional
+            If provided, restrict to these columns.
+        exclude : Sequence[str] or None, optional
+            Remove these columns from numeric set.
+
+        Returns
+        -------
+        pandas.DataFrame
+            The filtered numeric DataFrame.
+        """
+        
+        # Start from numeric-only columns.
         num = self.df.select_dtypes(include="number")
+        
+        # Apply exclude filter to avoid later reselection.
         if exclude:
             ex = set(exclude)
             num = num[[c for c in num.columns if c not in ex]]
+
+        # Apply inclusion list.    
         if columns:
             keep = [c for c in columns if c in num.columns]
             num = num[keep]
         return num
 
     def _finalise(self, fig: plt.figure, filename: str) -> None:
-        """Show or save figure depending on config."""
+        """
+        Show or save figure depending on configuration.
+
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            The figure to display or save.
+        filename : str
+            Output filename when 'save_dir' is configured.
+        """
+        
+        # Save to disk if a folder has been configured; else, just show
         if self.config.save_dir:
             self.config.save_dir.mkdir(parents=True, exist_ok=True)
             out_path = self.config.save_dir / filename
