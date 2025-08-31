@@ -109,13 +109,26 @@ class EDAExplorer:
     # ------------------------------------------------------------------
 
     def preview(self, n: int = 5, console: bool = True) -> None:
-        """Show head and tail."""
+        """
+        Show head/tail snapshot for quick inspection
+        
+        Parameters
+        ----------
+        n : int, optional
+            Number of rows to show (default: 5)
+        console : bool, optional
+            If True, print to console; otherwise, use rich display for notebook.
+            
+        """
+        
+        # Print first N rows.
         print(f"\nFirst {n} rows\n")
         if console:
             print(self.df.head(n))
         else:
             display(self.df.head(n))
 
+        # Print last N rows.
         print(f"\nLast {n} rows\n")
         if console:
             print(self.df.tail(n))
@@ -124,27 +137,55 @@ class EDAExplorer:
         
 
     def info(self) -> None:
-        """Print shape, dtypes, memory usage, and basic null summary."""
+        """
+        Print shape, dtypes, and memory usage.
+        """
+
+        # Basic shape (rows, columns).
         print("\nShape:\n")
         print(self.df.shape)
 
+        # Data types sorted.
         print("\nDtypes:")
         print(self.df.dtypes.sort_index())
 
+        # Approximate memory footprint using 'deep=True' option
         memory_mb = self.df.memory_usage(deep=True).sum() / (1024 ** 2)
         print(f"\nMemory usage: {memory_mb:,.2f} MB\n")
 
-    def describe_numeric(self, exclude: Optional[Sequence[str]] = None, console: bool = True) -> pd.DataFrame:
-        """Return numeric summary, excluding specific columns."""
+    def describe_numeric(
+            self, 
+            exclude: Optional[Sequence[str]] = None, 
+            console: bool = True
+            ) -> pd.DataFrame:
+        """
+        Return numeric summary, excluding specific columns.
+        
+        Parameters
+        ----------
+        exclude: Sequence[str], optional
+            Column names to exclude from description.
+        console : bool, optional
+            If True, print to console; otherwise, use rich display for notebook.
+        """
+        
+        # Select numeric columns after optional exclusion.
         num = self._select_numeric(columns=None, exclude=exclude)
+
+        # Fall-back if nothing remains after exclusion.
         if num.empty:
             print("No numeric columns to describe after exclusion.")
             return pd.DataFrame()
+        
+        # Describe and transpose.
         desc = num.describe().T
+
+        # Print to console or display for notebook.
         if console:
             print(desc)
         else:
             display(desc)
+
     
     def describe_categorical(self, top_n: int = 10, console: bool = True) -> pd.DataFrame:
         """Show top frequencies for object/category columns."""
