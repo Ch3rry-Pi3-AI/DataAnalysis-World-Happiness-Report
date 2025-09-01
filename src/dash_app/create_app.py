@@ -39,19 +39,52 @@ def dashboard(enable_pages: bool = True) -> Dash:
         "/about": about_layout,
     }
 
+    #----------------- Navbar  -------------------#
+
+    def navbar_links():
+        if enable_pages and dash.page_registry:
+            pass
+        
+        else:
+            return[
+                dcc.Link("Home", href="/", className="nav-link"),
+                dcc.Link("About", href="/about", className="nav-link"),
+            ]
+        
+    brand = dcc.Link("  DataVis App ", href="/", className="navbar-brand")
+    nav = html.Nav(
+        className="navbar navbar-expand-lg bg-dark",
+        **{"data-bs-theme": "dark"},
+        children=html.Div(
+            className="container-fluid",
+            children=html.Div([brand] + navbar_links(), className="navbar-nav"),
+        ),
+    )
     #----------------- Main content -------------------#
 
-    app.layout = html.Div([
-        # Main page
-        html.Div([
-            html.Br(),
-            html.P(
-                "Multi-Page Dash-Plotly Web App",
-                className="text-dark text-centre fw-bold fs-1"
+    header = html.P(
+        "Multi-Page Dash-Plotly Web App",
+        className="text-dark text-center fw-bold fs-1",
+    )
+
+    if enable_pages:
+        pass
+    else:
+        main_content = html.Div(id="page-content", className="container")
+
+    app.layout = html.Div(
+        [
+            nav,
+            html.Div(
+                [
+                    html.Br(),
+                    header,
+                    main_content
+                ], className="col-10 col-lg-8 mx-auto"
             ),
-            dash.page_container
-        ], className="col-6 mx-auto")
-    ], style={"height": "100vh", "background-colour": "#e3f2fd"})
+        ],
+        style={"minHeight": "100vh", "backgroundColor": "#e3f2df"},
+    )
 
     return app
 
