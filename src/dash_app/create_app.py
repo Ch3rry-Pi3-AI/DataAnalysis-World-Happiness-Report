@@ -43,7 +43,14 @@ def dashboard(enable_pages: bool = True) -> Dash:
 
     def navbar_links():
         if enable_pages and dash.page_registry:
-            pass
+            return[
+                dcc.Link(
+                    page["name"],
+                    href=page["relative_path"],
+                    className="nav-link"
+                )
+                for page in dash.page_registry.values()
+            ]
         
         else:
             return[
@@ -69,7 +76,7 @@ def dashboard(enable_pages: bool = True) -> Dash:
     )
 
     if enable_pages:
-        pass
+        main_content = dash.page_container
     else:
         main_content = html.Div(id="page-content", className="container")
 
