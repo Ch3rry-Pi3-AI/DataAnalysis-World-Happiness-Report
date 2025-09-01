@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, Input, Output
 import dash
 
 def dashboard(enable_pages: bool = True) -> Dash:
@@ -60,6 +60,7 @@ def dashboard(enable_pages: bool = True) -> Dash:
             children=html.Div([brand] + navbar_links(), className="navbar-nav"),
         ),
     )
+
     #----------------- Main content -------------------#
 
     header = html.P(
@@ -85,6 +86,23 @@ def dashboard(enable_pages: bool = True) -> Dash:
         ],
         style={"minHeight": "100vh", "backgroundColor": "#e3f2df"},
     )
+
+    #----------------- Manual router callback -------------------#
+    if not enable_pages:
+        app.layout.children.append(dcc.Location(id="url"))
+
+        @app.callback(Output("page-content", "children"), Input("url", "pathname"))
+        def route(pathname: str):
+            return manual_routes.get(
+                pathname,
+                html.Div(
+                    [
+                        html.H1("404", className="text-center mt-4"),
+                        html.P("Page not found.", className="text-center")
+                    ],
+                    className="container",
+                )
+            )
 
     return app
 
