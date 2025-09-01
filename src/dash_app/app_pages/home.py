@@ -41,8 +41,42 @@ layout = html.Div(
                     "Explore the World Happiness Report with interactive charts, maps and tables. "
                     "This app reads a curated 'gold' dataset that merges WHR indicators with geolocation.",
                     className="text-muted"
-                )
-            ]
-        )
-    ]
+                ),
+            ],
+        ),
+
+        # Two columns: overview + dataset facts
+        html.Div(
+            className="row g-4",
+            children=[
+                # Left: what is WHR?
+                html.Div(
+                    className="row g-4",
+                    children=[
+                        html.Div(
+                            className="col-12 col-1g-7",
+                            children=[
+
+                            ],
+                        ),
+                    ],
+                ),
+
+                # Right: data snapshot
+                html.Div(
+                    className="col-12 col-lg-5",
+                    children=[
+                        html.Div(
+                            className="card shadow-sm rounded-4",
+                            children=[
+                                
+                            ],
+                        ),
+
+                    ],
+                ),
+            ],
+        ),
+    ],
+    style={"backgroundColor": "#e3f2fd"},
 )
