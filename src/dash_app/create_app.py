@@ -16,6 +16,31 @@ def dashboard(enable_pages: bool = True) -> Dash:
         suppress_callback_exceptions=True,
     )
 
+    #----------------- Placeholder pages -------------------#
+
+    home_layout = html.Div(
+        [
+            html.H1("Home", className="text-center mt-4"),
+            html.P("Welcome to the demo scaffold.", className="text-center"),
+        ],
+        className="container",
+    )
+
+    about_layout = html.Div(
+        [
+            html.H1("About", className="text-center mt-4"),
+            html.P("This page is defined inline for now.", className="text-center"),
+        ],
+        className="container",
+    )
+
+    manual_routes = {
+        "/": home_layout,
+        "/about": about_layout,
+    }
+
+    #----------------- Main content -------------------#
+
     app.layout = html.Div([
         # Main page
         html.Div([
