@@ -12,6 +12,7 @@ def set_data_provider(func: Callable[[], pd.DataFrame]) -> None:
     _DATA_PROVIDER = func
 
 def get_gold_df() -> pd.DataFrame:
+    """Return gold DF from injected provider"""
     if _DATA_PROVIDER is None:
         raise RuntimeError("No data provider set.")
 
@@ -23,5 +24,6 @@ def get_gold_df() -> pd.DataFrame:
     df = df.copy()
     df.columns = [c.strip() for c in df.columns]
     return df
+
 if __name__ == "__main__":
     print("data access module")
