@@ -1,11 +1,19 @@
 from dash import Dash, html, dcc
 import dash
 
-def dashboard() -> Dash:
+def dashboard(enable_pages: bool = True) -> Dash:
     """Function to create and configure Dash app."""
-    
+
+    external_css = [
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+    ]
+
     app = Dash(
         __name__,
+        external_stylesheets=external_css,
+        use_pages=enable_pages,
+        pages_folder="app_pages" if enable_pages else None,
+        suppress_callback_exceptions=True,
     )
 
     app.layout = html.Div([
