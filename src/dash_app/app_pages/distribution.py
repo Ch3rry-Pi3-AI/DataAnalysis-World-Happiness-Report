@@ -1,7 +1,7 @@
 import dash
 from dash import html, dcc, Input, Output, callback
 import pandas as pd
-import plotly.graph_objects as go
+import plotly.express as px
 
 from src.dash_app.data_access import get_gold_df
 
@@ -100,5 +100,34 @@ layout = html.Div(
     Input("dist-colour-toggle", "value"),
 )
 
-def update_distribution():
-    pass
+def update_distribution(metric, year_value, regions, bins, colour_toggle):
+    df = _df()
+
+    if metric is None or metric not in df.columns:
+        return px.histogram(title="select a metric to view its distribution")
+    
+    # Apply filters
+    if year_value is not None and "year" in df.columns:
+        df = df[df["year"] == int(year_value)]
+    if regions and "regional_indicator" in df.columns:
+        if not isinstance(regions, list):
+            regions = [regions]
+        df = df[df["regional_indicator"].isin(regions)]
+
+    colour_col = "regional_indicator" if ("by_region" in colour_toggle and "regional_indicator" in df.columns) else None
+
+    # Histogram with optional colour & bin count
+    fig = px.histogram(
+        df,
+        x=metric,
+        nbins=bins,
+        color=colour_col,
+        barmode="overlay" if colour_col else "relative",
+        opacity=0.75,
+        title=f"Distribution of {metric.replace('_', ' ').title()}",
+    )
+
+    # Add lightweight box summary under x-axis (marginal) for quick spread check
+    fig.update_traces(marker_line_width=0)
+    fig.update_layout(margin={"t": 60, "l": 10, "r": 10, "b": 10})
+    return fig
