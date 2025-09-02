@@ -5,9 +5,9 @@ import plotly.graph_objects as go
 
 from src.dash_app.data_access import get_gold_df
 
-dash.register_page(__name__, path="/dataset", name="Dataset", order=1)
+dash.register_page(__name__, path="/dataset", name="Dataset 📋", order=1)
 
-# ----------------------- Helpers
+# ---- Helpers ----------------------------------------------------------------
 
 def _df() -> pd.DataFrame:
     return get_gold_df()
@@ -31,51 +31,62 @@ def _make_table_figure(df: pd.DataFrame, max_rows: int = 200) -> go.Figure:
             )
         ]
     )
-    fig.update_layout()
+    fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
     return fig
 
-# ----------------------- Layout
+# ---- Layout -----------------------------------------------------------------
+
 _BASE_DF = _df()
 
 layout = html.Div(
     [
-        html.H2(),
+        html.H2("Dataset Explorer", className="fw-bold text-center my-3"),
         html.Div(
-            className = "",
+            className="d-flex flex-wrap justify-content-center gap-3 mb-3",
             children=[
                 dcc.Dropdown(
-
+                    id="ds-year-dd",
+                    options=_year_options(_BASE_DF),
+                    placeholder="Select Year",
+                    clearable=True,
+                    className="form-select",
+                    style={"width": "220px"},
                 ),
                 dcc.Dropdown(
-
+                    id="ds-region-dd",
+                    options=_region_options(_BASE_DF),
+                    placeholder="Select Region(s)",
+                    multi=True,
+                    clearable=True,
+                    className="form-select",
+                    style={"width": "320px"},
                 ),
             ],
         ),
-        html.Div(),
-        dcc.Graph(),
-        html.Small()
+        html.Div(id="ds-row-count", className="text-center text-muted mb-2"),
+        dcc.Graph(id="ds-table", figure=_make_table_figure(_BASE_DF)),
+        html.Small("Showing up to 200 rows; refine filters to narrow results.", className="d-block text-center text-muted mt-2"),
     ]
 )
 
-# ----------------------- callbacks
+# ---- Callbacks ---------------------------------------------------------------
 
 @callback(
-    Output(),
-    Output(),
-    Input(),
-    Input(),
+    Output("ds-table", "figure"),
+    Output("ds-row-count", "children"),
+    Input("ds-year-dd", "value"),
+    Input("ds-region-dd", "value"),
 )
-
 def _update_table(year_value, region_values):
     df = _df()
 
     if year_value is not None:
         df = df[df["year"] == int(year_value)]
-
-    if region_values is not None:
+    if region_values:
+        if not isinstance(region_values, list):
+            region_values = [region_values]
         df = df[df["regional_indicator"].isin(region_values)]
 
-    fig = _make_table_figure(df, max=max_rows=200)
+    fig = _make_table_figure(df, max_rows=200)
     count_txt = f"{len(df):,} matching rows"
-    
     return fig, count_txt
