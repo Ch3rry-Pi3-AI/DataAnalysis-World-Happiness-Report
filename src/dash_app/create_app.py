@@ -5,7 +5,7 @@ def dashboard(enable_pages: bool = True) -> Dash:
     """Function to create and configure Dash app."""
 
     external_css = [
-        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.rtl.css"
     ]
 
     app = Dash(

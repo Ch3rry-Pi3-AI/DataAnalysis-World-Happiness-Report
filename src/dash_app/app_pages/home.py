@@ -8,7 +8,7 @@ dash.register_page(__name__, path="/", name="Home", order=0)
 def _df() -> pd.DataFrame:
     return get_gold_df()
 
-def _summary_items(df: pd.DataFrame):
+def _dataset_summary(df: pd.DataFrame):
     n_rows = len(df)
     n_cols = df.shape[1]
     num_cols = df.select_dtypes(include="number").shape[1]
@@ -20,7 +20,7 @@ def _summary_items(df: pd.DataFrame):
 
     items = [
         html.Li([html.B("Rows: "), (f"{n_rows}")]),
-        html.Li([html.B("Columns:" ), f"{n_cols}" f"(numeric: {num_cols}" f"(numeric: {num_cols}, non-numeric: {cat_cols})"]),
+        html.Li([html.B("Columns:" ), f"{n_cols} " f"(numeric: {num_cols}, non-numeric: {cat_cols})"]),
         html.Li([html.B("Countries: "), f"{countries}"]),
         html.Li([html.B("Years present: "), year_range])
     ]
@@ -80,7 +80,7 @@ layout = html.Div(
 
                                                 html.A(
                                                     "worldhappiness.report",
-                                                    "https://www.worldhappiness.report/",
+                                                    href="https://www.worldhappiness.report/",
                                                     target="_blank",
                                                     rel="noopener noreferrer",
                                                 ),
@@ -89,6 +89,7 @@ layout = html.Div(
                                         ),
 
                                         html.P(
+
                                             [
                                                 "Background reading for the 2021 edition (focus on COVID-19 impact): ",
 
@@ -119,6 +120,31 @@ layout = html.Div(
                             className="card shadow-sm rounded-4",
                             children=[
                                 
+                                html.Div(
+                                    className="card-body p-4",
+                                    children=[
+
+                                        html.H3("Dataset at a glance", className="fw-bold"),
+                                        html.Ul(_dataset_summary(_df0), className="list-group list-group-flush"),
+                                        html.Hr(),
+                                        html.Div(
+                                            [
+                                                html.Small("Columns:", className="text-muted d-block mb-1"),
+                                                html.Div(
+                                                    [
+                                                        html.Span(c, className="badge bg-light text-dark me-1 mb-1")
+                                                        for c in list(_df0.columns)[:12]
+                                                    ]
+
+                                                    + (
+                                                        [html.Span("…", className="text-muted ms-1")] 
+                                                        if len(_df0.columns) > 12 else []
+                                                    )
+                                                )
+                                            ]
+                                        ),
+                                    ]
+                                )
 
                             ],
                         ),
@@ -129,5 +155,5 @@ layout = html.Div(
         ),
     ],
 
-    style={"backgroundColor": "#e3f2fd"},
+    style={"backgroundColor": "#649ec784"},
 )
