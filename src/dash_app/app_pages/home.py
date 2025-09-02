@@ -30,17 +30,17 @@ def _dataset_summary(df: pd.DataFrame):
 _df0 = _df()
 
 layout = html.Div(
-    className="container py-4",
+    className="container py-4 rounded-2",
     children=[
         # Title
         html.Div(
             className="text-center mb-4",
             children=[
-                html.H1("World Happiness - Interactive Explorer", className="fw-bold"),
+                html.H1("Overview", className="text-light fw-bold"),
                 html.P(
                     "Explore the World Happiness Report with interactive charts, maps and tables. "
                     "This app reads a curated 'gold' dataset that merges WHR indicators with geolocation.",
-                    className="text-muted"
+                    className="text-light"
                 ),
             ],
         ),
@@ -61,7 +61,7 @@ layout = html.Div(
 
                                 html.Div(
 
-                                    className="card shadow-sm rounded-4",
+                                    className="card shadow-sm rounded-2",
                                     children=[
 
                                         html.H3("What is the World Happiness Report?", className="fw-bold"),
@@ -117,7 +117,7 @@ layout = html.Div(
                     children=[
 
                         html.Div(
-                            className="card shadow-sm rounded-4",
+                            className="card shadow-sm rounded-2",
                             children=[
                                 
                                 html.Div(
@@ -145,10 +145,8 @@ layout = html.Div(
                                         ),
                                     ]
                                 )
-
                             ],
                         ),
-
                     ],
                 ),
             ],
