@@ -46,5 +46,47 @@ def _make_table_figure(df: pd.DataFrame, max_rows: int = 200) -> go.Figure:
 # ----------------------- Layout
 _BASE_DF = _df()
 
+layout = html.Div(
+    className="container py-3",
+    children=[
+
+        html.H2
+
+        # Page title
+        html.Div(
+            className="",
+            children=[
+
+                # Year dropdown
+                html.Div(
+                    [
+                        html.Label(),
+                        dcc.Dropdown(
+
+                        ),
+                    ]
+                ),
+
+                # Region dropdown
+                html.Div(
+                    [
+                        html.Label(),
+                        dcc.Dropdown(
+
+                        ),
+                    ]
+                ),
+            ],
+        ),
+
+        # Table
+        html.Div(),
+        dcc.Graph(),
+        html.Div(
+            className="",
+            children=html.Small()
+        ),
+    ],
+)
 
 # ----------------------- callbacks
