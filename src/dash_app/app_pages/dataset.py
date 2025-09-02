@@ -90,3 +90,24 @@ layout = html.Div(
 )
 
 # ----------------------- callbacks
+
+@callback(
+    Output(),
+    Output(),
+    Input(),
+    Input(),
+)
+
+def _update_table(year_value, region_values):
+    df = _df()
+
+    if year_value is not None:
+        df = df[df["year"] == int(year_value)]
+
+    if region_values is not None:
+        df = df[df["regional_indicator"].isin(region_values)]
+
+    fig = _make_table_figure(df, max=max_rows=200)
+    count_txt = f"{len(df):,} matching rows"
+    
+    return fig, count_txt
