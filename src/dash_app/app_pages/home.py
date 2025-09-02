@@ -49,13 +49,61 @@ layout = html.Div(
         html.Div(
             className="row g-4",
             children=[
+
                 # Left: what is WHR?
                 html.Div(
                     className="row g-4",
                     children=[
+
                         html.Div(
                             className="col-12 col-1g-7",
                             children=[
+
+                                html.Div(
+
+                                    className="card shadow-sm rounded-4",
+                                    children=[
+
+                                        html.H3("What is the World Happiness Report?", className="fw-bold"),
+
+                                        html.P(
+                                            "The World Happiness Report (WHR) is an annual publication on global well-being. "
+                                            "It ranks countries using survey-based life evaluations (the 'Cantril ladder') and "
+                                            "analyses key correlations such as income, social support, healthy life expectancy, "
+                                            "freedom to make life choices, generosity, and perceptions of corruption."
+                                        ),
+
+                                        html.P(
+
+                                            [
+                                                "Learn more on the official site: ",
+
+                                                html.A(
+                                                    "worldhappiness.report",
+                                                    "https://www.worldhappiness.report/",
+                                                    target="_blank",
+                                                    rel="noopener noreferrer",
+                                                ),
+                                                "."
+                                            ]
+                                        ),
+
+                                        html.P(
+                                            [
+                                                "Background reading for the 2021 edition (focus on COVID-19 impact): ",
+
+                                                html.A(
+                                                    "WHR 2021 overview",
+                                                    href="https://wwww.worldhappiness.report/ed/2021/",
+                                                    target="_blank",
+                                                    rel="noopener noreferrer",
+                                                ),
+
+                                                ".",
+                                            ]
+                                        ),
+                                    ]
+                                )
 
                             ],
                         ),
@@ -66,10 +114,12 @@ layout = html.Div(
                 html.Div(
                     className="col-12 col-lg-5",
                     children=[
+
                         html.Div(
                             className="card shadow-sm rounded-4",
                             children=[
                                 
+
                             ],
                         ),
 
@@ -78,5 +128,6 @@ layout = html.Div(
             ],
         ),
     ],
+
     style={"backgroundColor": "#e3f2fd"},
 )
