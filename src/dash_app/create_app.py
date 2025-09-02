@@ -71,8 +71,8 @@ def dashboard(enable_pages: bool = True) -> Dash:
     #----------------- Main content -------------------#
 
     header = html.P(
-        "Multi-Page Dash-Plotly Web App",
-        className="text-dark text-center fw-bold fs-1",
+        "World Happiness Report Dash-Plotly Web App",
+        className="text-light text-center fw-bold fs-1",
     )
 
     if enable_pages:
@@ -91,7 +91,7 @@ def dashboard(enable_pages: bool = True) -> Dash:
                 ], className="col-10 col-lg-8 mx-auto"
             ),
         ],
-        style={"minHeight": "100vh", "backgroundColor": "#e3f2df"},
+        style={"minHeight": "100vh", "backgroundColor": "#071105"},
     )
 
     #----------------- Manual router callback -------------------#
