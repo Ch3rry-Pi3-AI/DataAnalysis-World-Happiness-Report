@@ -77,6 +77,43 @@ layout = html.Div(
     Input("avg-group-dd", "value"),
     Input("avg-year-slider", "value"),
 )
-def update_avg_bar(metric: str, group: str, topn: int):
-    pass
-    
+def update_avg_bar(metric: str, group_col: str, topn: int):
+    df = _df()
+
+    if metric is None or group_col is None or metric not in df.columns or group_col not in df.columns:
+        return px.bar(title="Select a metric and a grouping column")
+
+    # aggregate
+    agg = (
+        df.groupby(group_col, dropna=False)[metric]
+          .mean()
+          .reset_index()
+          .rename(columns={metric: "avg_value"})
+    )
+
+    # If grouping by country, limit to Top N by avg_value to keep chart readable
+    if group_col == "country_name" and isinstance(topn, (int, float)):
+        agg = agg.sort_values("avg_value", ascending=False).head(int(topn))
+    else:
+        agg = agg.sort_values("avg_value", ascending=False)
+
+    fig = px.bar(
+        agg,
+        x=group_col,
+        y="avg_value",
+        color=group_col if group_col in ("regional_indicator", "year") else None,
+        title=f"Average {_labelize(metric)} by {_labelize(group_col)}",
+    )
+
+    # Tidy layout
+    fig.update_layout(
+        xaxis_title=_labelize(group_col),
+        yaxis_title=f"Average {_labelize(metric)}",
+        margin={"t": 60, "l": 10, "r": 10, "b": 80},
+        legend_title_text=_labelize(group_col) if group_col in ("regional_indicator", "year") else None,
+    )
+
+    fig.update_xaxes(categoryorder="total descending")
+    fig.update_traces(marker_line_width=0.5)
+
+    return fig
