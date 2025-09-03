@@ -39,13 +39,28 @@ layout = html.Div(
             className="d-flex flex-wrap justify-content-center gap-3 mb-3",
             children=[
                 dcc.Dropdown(
-
+                    id="hm-year-dd",
+                    options=_year_options(_BASE),
+                    value=None,
+                    clearable=True,
+                    placeholder="Filter by Year",
                 ),
                 dcc.Dropdown(
-
+                    id="hm-method-dd",
+                    options=[
+                        {"label": "Pearson", "value": "pearson"},
+                        {"label": "Kendall", "value": "kendall"},
+                        {"label": "Spearman", "value": "spearman"},
+                    ],
+                    value="pearson",
+                    clearable=False,
+                    placeholder="Select correlation method",
                 ),
                 dcc.Checklist(
-
+                    id="hm-abs-toggle",
+                    options=[{"label": "Show absolute values", "value": "abs"}],
+                    value=[],
+                    inline=True,
                 ),
             ],
         ),
@@ -65,4 +80,44 @@ layout = html.Div(
     Input("hm-abs-toggle", "value"),
 )
 def _update_heatmap(year_value, method, abs_toggle):
-    pass
+    df = _df()
+
+    if year_value is not None and "year" in df.columns:
+        df = df[df["year"] == year_value]
+
+    num = _numeric(df)
+    num = _numeric(df)
+    if num.empty or num.shape[1] < 2:
+        fig = px.imshow([[1]], labels=dict(x="N/A", y="N/A", color="corr"), height=300)
+        fig.update_layout(title="Not enough numeric columns to compute correlation")
+        return fig
+    
+    corr = num.corr(method=method)
+    if abs_toggle:
+        corr = corr.abs()
+
+    try:
+        import scipy.cluster.hierarchy as sch
+        dist = 1 - corr.abs()
+        linkage = sch.linkage(dist, method="average")
+        dendro_order = sch.leaves_list(sch.dendrogram(linkage, no_plot=True)["leaves"])
+        corr = corr.iloc[dendro_order, :].iloc[:, dendro_order]
+    except Exception:
+        pass
+
+    fig = px.imshow(
+        corr,
+        height=600,
+        color_continuous_scale="RdBu",
+        zmin=-1 if not abs_toggle else 0,
+        zmax=1,
+        aspect="auto",
+    )
+    title = f"({method.title()} correlation)"
+    title_year = f" - Year {year_value}" if year_value else ""
+    fig.update_layout(
+        title=f"Correlation Heatmap{title}{title_year}",
+        margin={"t": 60, "l": 10, "r": 10, "b": 10},
+        coloraxis_colorbar_title="corr",
+    )
+    return fig
