@@ -83,5 +83,30 @@ layout = html.Div(
     Input("rel-toggles", "value"),
 )
 
-def update_relationship_graph(x, y, year, region, toggles):
-    pass
+def update_relationship_graph(x_col, y_col, year_value, region_values, toggles):
+    df = _df()
+
+    if x_col is None or y_col is None or x_col not in df.columns or y_col not in df.columns:
+        return px.scatter(title="Please select valid X and Y to view their relationship.")
+    
+    if year_value is not None and "year" in df.columns:
+        df = df[df["year"] == year_value]
+    if region_values and "regional_indicator" in df.columns:
+        df = df[df["regional_indicator"].isin(region_values)]
+
+    colour = "regional_indicator" if "region" in toggles and "regional_indicator" in df.columns else None
+    trendline = "ols" if ("trend" in (toggles[])) else None
+
+    fig = px.scatter(
+        df,
+        x=x_col,
+        y=y_col,
+        color=colour,
+        trendline=trendline,
+        title=f"Relationship between {x_col} and {y_col}",
+        opacity=0.7,
+    )
+
+    fig.update_traces(marker={"line": {"width": 0.5, "color": "DarkSlateGrey"}})
+    fig.update_layout(margin={"t": 60, "l": 10, "r": 10, "b": 10}, legend_title_text="Region" if colour else None)
+    return fig
