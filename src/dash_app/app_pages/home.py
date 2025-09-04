@@ -37,13 +37,13 @@ def _df() -> pd.DataFrame:
 # Build a short “facts” list for the dataset
 def _dataset_summary(df: pd.DataFrame) -> List[Component]:
     """Build a short, human-readable summary as list items."""
-    n_rows: int = df.shape[0]
-    n_cols: int = df.shape[1]
-    num_cols: int = df.select_dtypes(include="number").shape[1]
-    cat_cols: int = df.select_dtypes(exclude="number").shape[1]
-    countries: int = df["country_name"].nunique()
+    n_rows = df.shape[0]
+    n_cols = df.shape[1]
+    num_cols = df.select_dtypes(include="number").shape[1]
+    cat_cols = df.select_dtypes(exclude="number").shape[1]
+    countries = df["country_name"].nunique()
     year_min, year_max = int(df["year"].min()), int(df["year"].max())
-    year_range: str = f"{year_min}-{year_max}"
+    year_range = f"{year_min}-{year_max}"
 
     # Return Bootstrap-styled list items
     return [
@@ -52,6 +52,38 @@ def _dataset_summary(df: pd.DataFrame) -> List[Component]:
         html.Li([html.B("Countries: "), f"{countries}"]),
         html.Li([html.B("Years present: "), year_range]),
     ]
+
+# Create a Top/Bottom N list for the latest year
+def _rank_list_latest(df: pd.DataFrame, kind: str = "top", n: int=5) -> Component:
+    """Build a small block with a heading + bulleted list for Top/Bottom N in the latest year."""
+    latest_year = int(df["year"].max())
+    asc = (kind == "bottom")
+    title = (
+        f"Least {n} happy countries - {latest_year}" if asc else f"Top {n} happiest countries - {latest_year}"
+    )
+
+    ordered = (
+        df.loc[df["year"] == latest_year, ["country_name", "ladder_score"]]
+            .sort_values(by="ladder_score", ascending=asc)
+            .head(n)
+    )
+
+    items = [
+        html.Li(f"{r.country_name}: {r.ladder_score:.2f}") for r in ordered.itertuples(index=False)
+    ]
+
+    return html.Div(
+        [
+            html.H5(
+                title,
+                className="fw-bold mt-3 mb-2",
+            ),
+                html.Ul(
+                    items,
+                    className="mb-0"
+            ),
+        ]
+    )
 
 # ----------------------------------------------------------------------
 # Data
@@ -69,7 +101,10 @@ layout: Component = html.Div(
     className="container py-4 rounded-2",
     children=[
 
+        # --------------------------------------------------------------
         # Title block
+        # --------------------------------------------------------------
+
         html.Div(
 
             className="text-center mb-4",
@@ -87,12 +122,18 @@ layout: Component = html.Div(
             ],
         ),
 
-        # Two columns
+        # --------------------------------------------------------------
+        # Two columns: Overview (left) + Facts (right)
+        # --------------------------------------------------------------
+        
         html.Div(
             className="row g-4",
             children=[
 
+                # ------------------------------------------------------
                 # Left column
+                # ------------------------------------------------------
+
                 html.Div(
                     className="col lg-7",
                     children = [
@@ -177,7 +218,11 @@ layout: Component = html.Div(
                         ),
                     ],
                 ),
-                # Right column - Dataset at glance
+
+                # ------------------------------------------------------
+                # Right column
+                # ------------------------------------------------------
+
                 html.Div(
                     className="col-lg-5",
                     children=[
@@ -199,8 +244,12 @@ layout: Component = html.Div(
                                             className="fw-bold"
                                         ),
                                         html.Ul(
-                                            _dataset_summary(_df0), className="list-group list-group-flush"
+                                            _dataset_summary(_df0), 
+                                            className="list-group list-group-flush"
                                         ),
+                                        html.Hr(),
+                                        _rank_list_latest(_df0, kind="top", n=5),
+                                        _rank_list_latest(_df0, kind="bottom", n=5),
                                     ]
                                 )
                             ]
