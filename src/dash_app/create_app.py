@@ -71,7 +71,7 @@ def dashboard(enable_pages: bool = True) -> Dash:
     #----------------- Main content -------------------#
 
     header = html.P(
-        "World Happiness Report Dash-Plotly Web App",
+        "World Happiness Report Web App",
         className="text-light text-center fw-bold fs-1",
     )
 
