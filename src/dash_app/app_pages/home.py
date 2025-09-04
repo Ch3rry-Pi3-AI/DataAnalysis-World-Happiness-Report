@@ -2,10 +2,19 @@
 # Imports
 # ----------------------------------------------------------------------
 
+# Dash framework + HTML primitives
 import dash
 from dash import html
 
+# Data handling
+import pandas as pd
+
+# General component type for Dash return annotations
+from typing import List
 from dash.development.base_component import Component
+
+# Project data accessor
+from src.dash_app.data_access import get_gold_df
 
 # ----------------------------------------------------------------------
 # Page registration
@@ -18,15 +27,38 @@ dash.register_page(__name__, path="/", name="Home", order=0)
 # Data access
 # ----------------------------------------------------------------------
 
+# Small wrapper so tests can patch this easily
+def _df() -> pd.DataFrame:
+    return get_gold_df()
 # ----------------------------------------------------------------------
 # UI helpers
 # ----------------------------------------------------------------------
 
+# Build a short “facts” list for the dataset
+def _dataset_summary(df: pd.DataFrame) -> List[Component]:
+    """Build a short, human-readable summary as list items."""
+    n_rows: int = df.shape[0]
+    n_cols: int = df.shape[1]
+    num_cols: int = df.select_dtypes(include="number").shape[1]
+    cat_cols: int = df.select_dtypes(exclude="number").shape[1]
+    countries: int = df["country_name"].nunique()
+    year_min, year_max = int(df["year"].min()), int(df["year"].max())
+    year_range: str = f"{year_min}-{year_max}"
+
+    # Return Bootstrap-styled list items
+    return [
+        html.Li([html.B("Rows: "), f"{n_rows}"]),
+        html.Li([html.B("Columns: "), f"{n_cols} (numeric: {num_cols}, non-numeric: {cat_cols})"]),
+        html.Li([html.B("Countries: "), f"{countries}"]),
+        html.Li([html.B("Years present: "), year_range]),
+    ]
 
 # ----------------------------------------------------------------------
 # Data
 # ----------------------------------------------------------------------
 
+# Cache a DataFrame for this page
+_df0: pd.DataFrame = _df()
 
 # ----------------------------------------------------------------------
 # Layout
@@ -145,9 +177,38 @@ layout: Component = html.Div(
                         ),
                     ],
                 ),
-        #         # Right column - Dataset at glance
-        #         html.Div()
+                # Right column - Dataset at glance
+                html.Div(
+                    className="col-lg-5",
+                    children=[
+
+                        # Dataset snapshot + rankings
+                        html.Div(
+                            # Single card
+                            className="card shadow-sm rounded-2",
+                            children=[
+
+                                # Content
+                                html.Div(
+                                    className="card-body p-4",
+                                    children=[
+                                        
+                                        # Title
+                                        html.H3(
+                                            "Dataset at a glance",
+                                            className="fw-bold"
+                                        ),
+                                        html.Ul(
+                                            _dataset_summary(_df0), className="list-group list-group-flush"
+                                        ),
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                )
             ]
         )
-    ]
+    ],
+    style = {"backgroundColor": "#649ec784"}
 )
