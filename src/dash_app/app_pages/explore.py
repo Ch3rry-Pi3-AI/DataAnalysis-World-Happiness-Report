@@ -11,13 +11,36 @@ def _df() -> pd.DataFrame:
     return get_gold_df()
 
 def _numeric_cols(df: pd.DataFrame) -> list[str]:
-    pass
+    num = df.select_dtypes(include="number").columns.tolist()
+    headline = [
+        "ladder_score",
+        "logged_gdp_per_capita",
+        "healthy_life_expectancy",
+        "social_support",
+        "freedom_to_make_life_choices",
+        "generosity",
+        "perceptions_of_corruption",
+
+    ]
+
+    return [c for c in headline if c in num]
 
 def _year_options(df: pd.DataFrame):
-    pass
+    # Extract unique years in "year" column
+    years = sorted(pd.Series(df["year"]).unique().tolist(), reverse=True)
+
+    # Return a list of dictionaries, one per year, e.g., {"label": "2021", "value": 2021}
+    return [{"label": str(int(y)), "value": int(y)} for y in years]
 
 def _region_options(df: pd.DataFrame):
-    pass
+    regs = sorted(pd.Series(df["regional_indicator"]).dropna().unique().tolist())
+    return [{"label": r, "value": r} for r in regs]
 
 def _labels(s: str) -> str:
-    pass
+    return s.replace("_", " ").title()
+
+_BASE = _df()
+_NUMS = _numeric_cols(_BASE)
+_DEFAULT_X = _NUMS[0] if _NUMS else None
+_DEFAULT_Y = _NUMS[1] if len(_NUMS) > 1 else _DEFAULT_X
+
