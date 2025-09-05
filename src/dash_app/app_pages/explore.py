@@ -44,3 +44,25 @@ _NUMS = _numeric_cols(_BASE)
 _DEFAULT_X = _NUMS[0] if _NUMS else None
 _DEFAULT_Y = _NUMS[1] if len(_NUMS) > 1 else _DEFAULT_X
 
+# ----------------- layout
+control_col = html.Div(
+
+)
+
+plots_col = html.Div(
+
+)
+
+layout = html.Div(
+
+)
+
+# ------------------- callbacks
+def _apply_filters(df: pd.DataFrame, year_value: int = 2021, regions: str = "regional_indicator"):
+    if year_value is not None:
+        df = df[df["year"] == int(year_value)]
+
+    if regions:
+        if not isinstance(regions, list):
+            regions = [regions]
+        df = df[df["regional_indicator"].isin(regions)]
