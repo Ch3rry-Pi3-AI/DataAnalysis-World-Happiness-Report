@@ -66,3 +66,34 @@ def _apply_filters(df: pd.DataFrame, year_value: int = 2021, regions: str = "reg
         if not isinstance(regions, list):
             regions = [regions]
         df = df[df["regional_indicator"].isin(regions)]
+
+@callback(
+    Output("ex-rel-fig", "figure"),
+    Input("ex-x-dd", "value"),
+    Input("ex-y-dd", "value"),
+    Input("ex-year-dd", "value"),
+    Input("ex-region-dd", "value"),
+)
+
+def _update_relationship(x_col, y_col, year_value, region_values):
+    df = _apply_filters(_df(), year_value, region_values)
+    if not x_col or y_col:
+        return px.scatter(title="Select X and Y to view their relationship")
+    
+    colour = "regional_indicator"
+    fig = px.scatter(
+        df,
+        x=x_col,
+        y=y_col,
+        color=colour,
+        hover_data=["country_name", "year"],
+        title=f"{_labels(x_col)} vs {_labels(y_col)}"
+    )
+    fig.update_traces(marker={"line": {"width": 0.5}})
+    fig.update_layout(
+        margin={"t": 60, "l": 10, "r": 10, "b": 10},
+        legend=dict(title="Region", bgolor="rgba(225,225,225,0.6)"),
+    )
+    
+    return fig
+    
