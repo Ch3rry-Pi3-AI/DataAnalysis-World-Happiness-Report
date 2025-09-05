@@ -176,9 +176,10 @@ layout: Component = html.Div(
 
                 # Brief description of the app
                 html.P(
-                    "Explore the World Happiness Report with interactive charts, maps and tables. "
-                    "This app reads a curated 'gold' dataset that merges WHR indicators with geolocation.",
-                    className="text-light",
+                    "Explore the World Happiness Report (WHR) through interactive charts, maps, and tables. "
+                    "This app uses a curated dataset combining WHR indicators with geolocation. "
+                    "Use the navigation bar at the top to switch between views.",
+                    className="text-light fw-bold",
                 ),
             ],
         ),
@@ -223,7 +224,7 @@ layout: Component = html.Div(
                                             "The World Happiness Report (WHR) is an annual publication on global well-being. "
                                             "It ranks countries using survey-based life evaluations (the 'Cantril ladder') and "
                                             "analyses key correlations such as income, social support, healthy life expectancy, "
-                                            "freedom to make life choices, generosity, and perceptions of corruption."
+                                            "freedom to make life choices, generosity, and perceptions of corruption.",
                                         ),
 
                                         # Link to official WHR site
@@ -311,7 +312,10 @@ layout: Component = html.Div(
                         # Dataset snapshot + rankings
                         html.Div(
 
-                            # Single card
+                            # ------------------------------------------
+                            # Single card for Snapshot + Rankings
+                            # ------------------------------------------
+
                             className="card shadow-sm rounded-2",
                             children=[
 
@@ -329,9 +333,12 @@ layout: Component = html.Div(
                                         # Horizontal line
                                         html.Hr(),
 
-                                        # Heading
+                                        # ------------------------------
+                                        # Snapshot 
+                                        # ------------------------------
+
                                         html.H5(
-                                            "Dimensions",
+                                            "Snapshot",
                                             className="fw-bold mt-3 mb-2",
                                         ),
 
@@ -344,7 +351,10 @@ layout: Component = html.Div(
                                         # Horizontal line
                                         html.Hr(),
 
-                                        # Lists of Top/Bottom 5 countries ranked by ladder score
+                                        # ------------------------------
+                                        # Ranking 
+                                        # ------------------------------
+
                                         _rank_list_latest(_df0, kind="top", n=5),
                                         _rank_list_latest(_df0, kind="bottom", n=5),
                                     ]
