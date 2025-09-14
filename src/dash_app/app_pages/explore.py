@@ -39,14 +39,60 @@ def _region_options(df: pd.DataFrame):
 def _labels(s: str) -> str:
     return s.replace("_", " ").title()
 
+# ------------ Data / defaults
+
 _BASE = _df()
 _NUMS = _numeric_cols(_BASE)
 _DEFAULT_X = _NUMS[0] if _NUMS else None
 _DEFAULT_Y = _NUMS[1] if len(_NUMS) > 1 else _DEFAULT_X
 
 # ----------------- layout
-control_col = html.Div(
+controls_col = html.Div(
+    className="col-12 col-lg-3",
+    children=[
+        html.H5("Controls", className="fw-bold mb-3"),
+        html.Label("Year", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ex-year-dd",
+            options=_year_options(_BASE),
+            placeholder="(optional)",
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
 
+        html.Label("Region(s)", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ex-region-dd",
+            options=_region_options(_BASE),
+            placeholder="(optional)",
+            multi=True,
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("X axis", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ex-x-dd",
+            options=[{"label": _labelize(c), "value": c} for c in _NUMS],
+            value=_DEFAULT_X,
+            clearable=False,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("Y axis", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ex-y-dd",
+            options=[{"label": _labels(c), "value": c} for c in _NUMS],
+            value=_DEFAULT_Y,
+            clearable=False,
+            style={"fontSize": "12px"},
+        ),
+        html.Hr(),
+        html.Small("Tip: choose X & Y, then refine by year and region.", className="text-muted"),
+    ],
 )
 
 plots_col = html.Div(
