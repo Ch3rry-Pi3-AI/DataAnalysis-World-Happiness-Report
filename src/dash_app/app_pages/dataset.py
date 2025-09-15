@@ -52,3 +52,66 @@ def _make_table_figure(df: pd.DataFrame, max_rows: int = 200) -> go.Figure:
 
     fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
     return fig
+
+def _make_overall_summary(df: pd.DataFrame, metric: str) -> go.Figure:
+    if metric not in df.columns or df[metric].dropna().empty:
+        return go.Figure(data=[go.Table(
+            header=dict(values=["Notice", "Detail"], align="left"),
+            cells=dict(values=[["Info"], ["Select a metric with data"]], align="left"),
+        )])
+    s = df[metric].dropna()
+    # Robust stats
+    stats = pd.DataFrame({
+        "stat": ["count", "mean", "std", "min", "25%", "50%", "75%", "max"],
+        "value": [
+            int(s.count()),
+            s.mean(),
+            s.std(),
+            s.min(),
+            s.quantile(0.25),
+            s.median(),
+            s.quantile(0.50),
+            s.max(),
+        ],
+    })
+    stats["value"] = stats["value"].astype(float).round(3)
+    fig = go.Figure(data=[
+        go.Table(
+            header=dict(values=[_labels(metric), "Value"], align="left"),
+            cells=dict(values=[stats["stat"], stats["value"]], align="left"),
+        )
+    ])
+    fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
+    return fig
+
+def _make_regional_summary(df: pd.DataFrame, metric: str) -> go.Figure:
+    reg_col = "regional_indicator"
+    if reg_col not in df.columns or metric not in df.columns:
+        return go.Figure(data=[go.Table(
+            header=dict(values=["Notice", "Detail"], align="left"),
+            cells=dict(values=[["Info"], ["Region or metric missing"]], align="left"),
+        )])
+
+    g = (
+        df[[reg_col, metric]]
+        .dropna(subset=[metric])
+        .groupby(reg_col, as_index=False)
+        .agg(mean=(metric, "mean"), count=(metric, "count"))
+        .sort_values(["count", "mean"], ascending=[False, False])
+    )
+    if g.empty:
+        return go.Figure(data=[go.Table(
+            header=dict(values=["Notice", "Detail"], align="left"),
+            cells=dict(values=[["Info"], ["No data after filters"]], align="left"),
+        )])
+    g["mean"] = g["mean"].round(3)
+
+    fig = go.Figure(data=[
+        go.Table(
+            header=dict(values=["Region", "Mean", "Count"], align="left"),
+            cells=dict(values=[g[reg_col], g["mean"], g["count"]], align="left"),
+        )
+    ])
+    fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
+    return fig
+
