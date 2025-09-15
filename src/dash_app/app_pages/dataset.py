@@ -115,3 +115,82 @@ def _make_regional_summary(df: pd.DataFrame, metric: str) -> go.Figure:
     fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
     return fig
 
+def _apply_filters(df: pd.DataFrame, year_value, regions, country_text):
+    # Year filter
+    if year_value is not None and "year" in df.columns:
+        df = df[df["year"] == int(year_value)]
+
+    # Region(s) filter
+    if regions and "regional_indicator" in df.columns:
+        if not isinstance(regions, list):
+            regions = [regions]
+        df = df[df["regional_indicator"].isin(regions)]
+
+    # Country text search (contains; case-insensitive)
+    if country_text and "country_name" in df.columns:
+        t = str(country_text).strip().lower()
+        if t:
+            df = df[df["country_name"].str.lower().str.contains(t, na=False)]
+
+    return df
+
+# ---------------- Data / Defaults ---------
+_BASE = _df()
+_NUMS = _numeric_cols(_BASE)
+_DEFAULT_METRIC = _NUMS[0] if _NUMS else None
+_DEFAULT_COLUMNS = [c for c in ["country_name", "year", "regional_indicator", "ladder_score"] if c in _BASE.columns]
+
+# ------------ Layout--------------
+
+tables_col = html.Div(
+    className="col-12 col-lg-9",
+    children=[
+        # Top: full-width main table
+        dcc.Graph(id="ds-main-table", style={"height": "420px"}, className="mb-3"),
+        html.Div(
+            className="row g-3",
+            children=[
+
+                html.Div(
+                    className="col-12 col-xl-6", 
+                    children=[
+                        html.H6("Overall Summary", className="fw-bold mb-2"),
+                        dcc.Graph(id="ds-summary-overall", style={"height": "360px"}),
+                ]),
+                html.Div(
+                    className="col-12 col-xl-6", 
+                    children=[
+                        html.H6("Regional Summary", className="fw-bold mb-2"),
+                        dcc.Graph(id="ds-summary-region", style={"height": "360px"}),
+                        ]
+                    ),
+            ],
+        ),
+        html.Div(
+            id="ds-row-count", 
+            className="text-end text-muted mt-2"
+        ),
+        html.Small(
+            "Main table shows up to 200 rows.", 
+            className="d-block text-end text-muted"
+        ),
+    ],
+)
+
+
+# ------------ Callbacks
+@callback(
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+    Output("ds-main-table", "figure"),
+)
+
+def _update_dataset_page():
+    pass
