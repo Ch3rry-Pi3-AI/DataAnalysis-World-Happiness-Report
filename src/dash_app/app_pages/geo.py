@@ -88,3 +88,26 @@ controls_col = html.Div(
         html.Small("Tip: pick a year & metric, then refine by region.", className="text-muted"),
     ],
 )
+
+charts_col = html.Div(
+    className="col-12 col-lg-9",
+    children=[
+        # Top row: full-width choropleth
+        dcc.Graph(id="geo-choropleth", style={"height": "460px"}, className="mb-3"),
+        # Second row: radial (by region) + top 10 bar chart
+        html.Div(
+            className="row g-3",
+            children=[
+                html.Div(className="col-12 col-xl-6", children=[
+                    html.H6("Regional Radial", className="fw-bold mb-2"),
+                    dcc.Graph(id="geo-radial", style={"height": "360px"}),
+                ]),
+                html.Div(className="col-12 col-xl-6", children=[
+                    html.H6("Top 10 Countries", className="fw-bold mb-2"),
+                    dcc.Graph(id="geo-top10", style={"height": "360px"}),
+                ]),
+            ],
+        ),
+        html.Div(id="geo-row-count", className="text-end text-muted mt-2"),
+    ],
+)
