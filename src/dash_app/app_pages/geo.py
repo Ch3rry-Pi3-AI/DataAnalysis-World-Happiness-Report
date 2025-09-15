@@ -42,7 +42,7 @@ def _apply_filters(df: pd.DataFrame, year_value, regions):
         df = df[df["regional_indicator"].isin(regions)]
     return df
 
-# ---------- Data / Defaults -----------
+# ---------- Data / Defaults
 _BASE = _df()
 _NUMS = _numeric_cols(_BASE)
 
