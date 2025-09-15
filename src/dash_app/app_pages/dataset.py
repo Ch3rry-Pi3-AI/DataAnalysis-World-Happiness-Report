@@ -192,5 +192,17 @@ tables_col = html.Div(
     Output("ds-main-table", "figure"),
 )
 
-def _update_dataset_page():
+def _update_dataset_page(year_value, region_values, country_text, selected_cols, metric):
     pass
+    df = _apply_filters(_df(), year_value, region_values, country_text)
+
+    # Main table columns (fallback to all columns if none selected)
+    cols = [c for c in (selected_cols) or list(df.columns) if c in df.columns]
+    df_main = df[cols] if cols else df
+
+    main_table_fig = _make_table_figure(df_main, max_rows=200)
+    overall_fig = _make_overall_summary(df, metric,) if metric else _make_overall_summary(df, _DEFAULT_METRIC or df.columns[0])
+    regional_fig = _make_regional_summary(df, metric) if metric else _make_regional_summary(df, _DEFAULT_METRIC or df.columns[0])
+
+    count_txt = f"{len(df)}:, matching rows"
+    return main_table_fig, overall_fig, regional_fig, count_txt    
