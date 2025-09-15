@@ -75,7 +75,7 @@ controls_col = html.Div(
         html.Label("X axis", className="form-label mb-1"),
         dcc.Dropdown(
             id="ex-x-dd",
-            options=[{"label": _labelize(c), "value": c} for c in _NUMS],
+            options=[{"label": _labels(c), "value": c} for c in _NUMS],
             value=_DEFAULT_X,
             clearable=False,
             style={"fontSize": "12px"},
@@ -96,6 +96,11 @@ controls_col = html.Div(
 )
 
 plots_col = html.Div(
+    ClassName="col-12 col-lg-9",
+    children=[
+        dcc.Graph(id="ex-rel-fig", style={"height": "400px"}, className="mb-3"),
+        dcc.Graph(id="ex-dist-fig", style={"height": "400px"}),
+    ],
 
 )
 
