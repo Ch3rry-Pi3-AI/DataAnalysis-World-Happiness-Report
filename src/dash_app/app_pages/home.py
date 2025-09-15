@@ -156,7 +156,7 @@ _df0: pd.DataFrame = _df()
 
 # Page container (L1)
 layout: Component = html.Div(
-    className="container py-4 rounded-2",
+    className="container-fluid py-4 rounded-2",
     children=[
 
         # --------------------------------------------------------------
