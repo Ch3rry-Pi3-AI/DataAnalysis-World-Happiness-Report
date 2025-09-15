@@ -240,18 +240,39 @@ tables_col = html.Div(
 )
 
 
-# ------------ Callbacks
+layout = html.Div(
+    className="container-fluid py-4 rounded-2",
+    style={"backgroundColor": "#649ec784"},
+    children=[
+        html.Div(
+            className="text-center mb-4",
+            children=[
+                html.H2("Dataset Explorer", className="text-light fw-bold"),
+                html.P("Filter, view, and summarise the World Happiness dataset.", className="text-light fw-bold"),
+            ],
+        ),
+        html.Div(
+            className="card shadow-sm rounded-2",
+            children=[
+                html.Div(className="card-body", children=[
+                    html.Div(className="row g-3", children=[controls_col, tables_col])
+                ])
+            ],
+        ),
+    ],
+)
+
+# ---------------- Callbacks ----------------
 @callback(
     Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
-    Output("ds-main-table", "figure"),
+    Output("ds-summary-overall", "figure"),
+    Output("ds-summary-region", "figure"),
+    Output("ds-row-count", "children"),
+    Input("ds-year-dd", "value"),
+    Input("ds-region-dd", "value"),
+    Input("ds-country-text", "value"),
+    Input("ds-colselect-dd", "value"),
+    Input("ds-metric-dd", "value"),
 )
 
 def _update_dataset_page(year_value, region_values, country_text, selected_cols, metric):
