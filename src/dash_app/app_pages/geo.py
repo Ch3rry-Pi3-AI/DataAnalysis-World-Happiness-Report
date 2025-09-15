@@ -149,11 +149,33 @@ layout = html.Div(
     Output("geo-metric-dd", "value"),
 )
 
-def _update_geo():
-    pass
+def _update_geo(year_value, region_values, metric):
+    df = _apply_filters(_df(), year_value, region_values)
+    count_txt = f"{len(df):,} matching rows"
 
     # Chroropleth
+    if metric and "country_name" in df.columns and metric in df.columns:
+        map_df = df.dropna(subset=[metric, "country_name"])
 
+        if map_df.empty:
+            choropleth = px.choropleth(title="No data for selection")
+        else:
+            choropleth = px.choropleth(
+                map_df,
+                locations="country_name",
+                locationmode="country names",
+                color=metric,
+                hover_name="country_name",
+                hover_data=["regional_indicator", metric] if "regional_indicator" in map_df.columns else [metric],
+                color_continuous_scale="Viridis",
+                title=f"{_labels(metric)} — Choropleth" + (f" · {int(year_value)}" if year_value else ""),
+            )
+            choropleth.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, coloraxis_colorbar=dict(title=_labels(metric)))
+    else:
+        choropleth = px.choropleth(title="Select a metric")
+            
     # Radial
 
     # Bar
+
+    return choropleth
