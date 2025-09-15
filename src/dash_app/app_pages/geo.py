@@ -49,3 +49,42 @@ _NUMS = _numeric_cols(_BASE)
 # Defaults requested: Year=2021, Metric="ladder_score"
 _DEFAULT_YEAR = 2021 if "year" in _BASE.columns and (pd.Series(_BASE["year"]).dropna() == 2021).any() else (int(pd.Series(_BASE["year"]).dropna().max()) if "year" in _BASE.columns else None)
 _DEFAULT_METRIC = "ladder_score" if "ladder_score" in _NUMS else (_NUMS[0] if _NUMS else None)
+
+controls_col = html.Div(
+    className="col-12 col-lg-3",
+    children=[
+        html.H5("Filters", className="fw-bold mb-3"),
+
+        html.Label("Year", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="geo-year-dd",
+            options=_year_options(_BASE),
+            value=_DEFAULT_YEAR,
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("Region(s)", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="geo-region-dd",
+            options=_region_options(_BASE),
+            placeholder="(optional)",
+            multi=True,
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("Metric", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="geo-metric-dd",
+            options=_metric_options(_BASE),
+            value=_DEFAULT_METRIC,
+            clearable=False,
+            style={"fontSize": "12px"},
+        ),
+        html.Hr(),
+        html.Small("Tip: pick a year & metric, then refine by region.", className="text-muted"),
+    ],
+)
