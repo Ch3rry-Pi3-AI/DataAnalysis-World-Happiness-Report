@@ -101,11 +101,40 @@ plots_col = html.Div(
         dcc.Graph(id="ex-rel-fig", style={"height": "400px"}, className="mb-3"),
         dcc.Graph(id="ex-dist-fig", style={"height": "400px"}),
     ],
-
 )
 
 layout = html.Div(
-
+    className="container py-4 rounded-2",
+    style={"backgroundColor": "#649ec784"},
+    children=[
+        html.Div(
+            className="text-center mb-4",
+            children=[
+                html.H2("Explore", className="text-light fw-bold"),
+                html.P(
+                    "Investigate relationships and distributions in the World Happiness dataset.", 
+                    className="text-light fw-bold",
+                ),
+            ],
+        ),
+        html.Div(
+            className="card shadow-sm rounded-2",
+            children=[
+                html.Div(
+                    className="card-body",
+                    children=[
+                        html.Div(
+                            className="row g-3",
+                            children=[
+                                controls_col,
+                                plots_col
+                            ]
+                        )
+                    ],
+                ),
+            ],
+        ),
+    ],
 )
 
 # ------------------- callbacks
