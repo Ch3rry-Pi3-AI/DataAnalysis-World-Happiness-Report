@@ -140,15 +140,20 @@ layout = html.Div(
 # -------------- callbacks
 
 @callback(
-    Output(),
-    Output(),
-    Output(),
-    Output(),
-    Output(),
-    Output(),
-    Output(),
-    Output(),
+    Output("geo-choropleth", "figure"),
+    Output("geo-radial", "figure"),
+    Output("geo-top10", "figure"),
+    Output("geo-row-count", "children"),
+    Output("geo-year-dd", "value"),
+    Output("geo-region-dd", "value"),
+    Output("geo-metric-dd", "value"),
 )
 
 def _update_geo():
     pass
+
+    # Chroropleth
+
+    # Radial
+
+    # Bar
