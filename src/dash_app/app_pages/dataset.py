@@ -142,6 +142,68 @@ _DEFAULT_COLUMNS = [c for c in ["country_name", "year", "regional_indicator", "l
 
 # ------------ Layout--------------
 
+controls_col = html.Div(
+    className="col-12 col-lg-3",
+    children=[
+        html.H5("Filters", className="fw-bold mb-3"),
+
+        html.Label("Year", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ds-year-dd",
+            options=_year_options(_BASE),
+            placeholder="(optional)",
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("Region(s)", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ds-region-dd",
+            options=_region_options(_BASE),
+            placeholder="(optional)",
+            multi=True,
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("Country contains", className="form-label mb-1"),
+        dcc.Input(
+            id="ds-country-text",
+            type="text",
+            placeholder="e.g., 'Uni' for 'United...'",
+            style={"width": "100%", "fontSize": "12px"},
+        ),
+        html.Div(style={"height": "12px"}),
+
+        html.Hr(),
+
+        html.Label("Columns to show (main table)", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ds-colselect-dd",
+            options=_col_options(_BASE),
+            value=_DEFAULT_COLUMNS,
+            multi=True,
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("Summary metric", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ds-metric-dd",
+            options=[{"label": _labels(c), "value": c} for c in _NUMS],
+            value=_DEFAULT_METRIC,
+            clearable=False,
+            style={"fontSize": "12px"},
+        ),
+
+        html.Hr(),
+        html.Small("Tip: refine by year/region/country; choose columns and a metric for summaries.", className="text-muted"),
+    ],
+)
+
 tables_col = html.Div(
     className="col-12 col-lg-9",
     children=[
