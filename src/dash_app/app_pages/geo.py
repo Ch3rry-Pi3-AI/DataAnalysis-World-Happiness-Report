@@ -111,3 +111,44 @@ charts_col = html.Div(
         html.Div(id="geo-row-count", className="text-end text-muted mt-2"),
     ],
 )
+
+layout = html.Div(
+    className="container-fluid py-4 rounded-2",
+    style={"backgroundColor": "#649ec784"},
+    children=[
+        html.Div(
+            className="text-center mb-4",
+            children=[
+                html.H2("Global View", className="text-light fw-bold"),
+                html.P("Map, regional radial, and Top-10 countries for the seclected metric", className="text-light fw-bold"),
+            ],
+        ),
+        html.Div(
+            className="card shadow-sm rounded-2",
+            children=[
+                html.Div(
+                    className="card-body",
+                    children=[
+                        html.Div(className="row g-3", children=[controls_col, charts_col]),
+                    ]
+                )
+            ],
+        ),           
+    ],
+)
+
+# -------------- callbacks
+
+@callback(
+    Output(),
+    Output(),
+    Output(),
+    Output(),
+    Output(),
+    Output(),
+    Output(),
+    Output(),
+)
+
+def _update_geo():
+    pass
