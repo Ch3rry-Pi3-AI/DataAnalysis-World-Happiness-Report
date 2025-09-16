@@ -85,6 +85,23 @@ def _make_top10_yoy(df: pd.DataFrame, metric: str, latest_year: int) -> go.Figur
     merged = pd.merge(now, prev, on="country_name", how="left")
     merged["yoy"] = merged["now"] - merged["prev"]
 
+    # keep rows with valid previous year
+    merged = merged.dropna(subset="yoy")
+    if merged.empty:
+        return px.bar(title=f"Top-10 YoY change (no {prev_year} data)")
+    
+    top10 = merged.sort_values(by="yoy", ascending=False).head(10)
+
+    fig = px.bar(
+        top10,
+        x="yoy",
+        y="country_name",
+        orientation="h",
+        color="regional_indicator" if "regional_indicator" in top10.columns else None,
+        title=f"Top-10 YoY Change in {_labels(metric)} - {prev_year} -> {latest_year}",
+        hover_data=["now", "prev"]
+    )
+
 def _make_time_series(df: pd.DataFrame, metrics: list[str]) -> go.Figure:
     # Aggregat to mean for year for  each metric
     need = [m for m in (metrics or []) if m in df.columns]
