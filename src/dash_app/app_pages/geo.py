@@ -202,7 +202,7 @@ def _update_geo(year_value, region_values, metric):
             top10 = px.bar(title="Top 10 Countries — No data")
         else:
             top10 = px.bar(
-                top_src.sort_values(metric, ascending=True),  # small at bottom, big at top
+                top_src.sort_values(metric, ascending=True),  
                 x=metric,
                 y="country_name",
                 color=reg_col if reg_col in top_src.columns else None,
