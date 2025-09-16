@@ -56,4 +56,22 @@ def _apply_filters(df: pd.DataFrame, year_range, regions, country_text):
         if t:
             df = df[df["country_name"].str.lower().str.contains(t, na=False)]
         return df
+    
+def _make_snapshot_table(df: pd.DataFrame, metrics: list[str], latest_year: int) -> go.Figure:
+    cols = ["country_name", "regional_indicator", "year"] + [m for m in (metrics or []) if m in df.columns]
+    cols = [c for c in cols if c in df.columns]
+    snap = df[df["year"] == latest_year][cols].copy() if "year" in df.columns else df[cols].copy()
+
+    if "country_name" in snap.columns and "ladder_score" in snap.columns:
+        snap = snap.sort_values(by = "ladder_score", ascending=False)
+    
+    fig = go.Figure(data=[
+        go.Table(
+            header=dict(values=[_labels(c) for c in snap.columns], align="left"),
+            cells=dict(values=[snap[c].head(200) for c in snap.columns], align="left")
+        )
+    ])
+    
+    fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
+    return fig
 
