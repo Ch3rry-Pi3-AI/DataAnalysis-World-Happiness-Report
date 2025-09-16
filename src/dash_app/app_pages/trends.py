@@ -139,3 +139,16 @@ _YEAR_MAX = int(_YEARS[-1]) if _YEARS else None
 
 _DEFAULT_METRICS = _default_ts_metrics(_BASE)
 _PRIMARY_METRIC = _DEFAULT_METRICS[0] if _DEFAULT_METRICS else None
+
+
+# Callbacks
+@callback(
+    Output("ts-snapshot-table", "figure"),
+    Output("ts-top10-yoy", "figure"),
+    Output("ts-lines", "figure"),
+    Output("ts-row-count", "children"),
+    Input("ts-year-range", "value"),
+    Input("ts-region-dd", "value"),
+    Input("ts-country-text", "value"),
+    Input("ts-metrics-dd", "value"),
+)
