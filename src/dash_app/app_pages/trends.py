@@ -161,7 +161,7 @@ def _update_trends(year_range, region_values, country_text, metrics):
     latest_year = int(df["year"].max()) if "year" in df.columns and not df.empty else None
 
     snapshot_fig = _make_snapshot_table(df, metrics, latest_year) if latest_year else go.Figure()
-    primary = (metrics of _DEFAULT_METRICS or [])[:1]
+    primary = (metrics or _DEFAULT_METRICS or [])[:1]
     primary_metric = primary[0] if primary else None
     yoy_fig = _make_top10_yoy(df, primary_metric, latest_year) if latest_year else px.bar(title="Top-10 YoY Change")
 
