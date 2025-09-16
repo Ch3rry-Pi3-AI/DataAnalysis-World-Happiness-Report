@@ -141,7 +141,36 @@ _DEFAULT_METRICS = _default_ts_metrics(_BASE)
 _PRIMARY_METRIC = _DEFAULT_METRICS[0] if _DEFAULT_METRICS else None
 
 
-# Callbacks
+# ---------- layout
+layout = html.Div(
+    className="container-fluid py-4 rounded-2",
+    style={"backgroundColor": "#649ec784"},
+    children=[
+        html.Div(
+            className="text-center mb-4",
+            children=[
+                html.H2("Trends", className="text-light fw-bold"),
+                html.P("Explore how key metrics evolve over time.", className="text-light fw-bold"),
+            ],
+        ),
+        html.Div(
+            className="card shadow-sm rounded-2",
+            children=[
+                html.Div(
+                    className="card-body",
+                    children=[
+                        html.Div(
+                            className="row g-3",
+                            children=[controls_col, charts_col]
+                        )
+                    ]
+                )
+            ],
+        ),
+    ],
+)
+
+# ---------- Callbacks
 @callback(
     Output("ts-snapshot-table", "figure"),
     Output("ts-top10-yoy", "figure"),
