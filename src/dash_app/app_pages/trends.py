@@ -141,7 +141,65 @@ _DEFAULT_METRICS = _default_ts_metrics(_BASE)
 _PRIMARY_METRIC = _DEFAULT_METRICS[0] if _DEFAULT_METRICS else None
 
 
-# Callbacks
+# ---------- layout
+
+charts_col = html.Div(
+    className="col-12 col-lg-9",
+    children=[
+        html.Div(
+            className="row g-3",
+            children=[
+                html.Div(
+                    className="col-12 col-xl-6",
+                    children=[
+                        html.H6("Latest Snapshot (by Country)", className="fw-bold mb-2"),
+                        dcc.Graph(id="ts-snapshot-table", style={"height": "360px"}),
+                    ]
+                ),
+                html.Div(
+                    className="col-12 col-xl-6",
+                    children=[
+                        html.H6("Top-10 YoY Change (Primary Metric)", className="fw-bold mb-2"),
+                        dcc.Graph(id="ts-top10-you", style={"height": "360px"}),
+                    ]
+                ),
+            ],
+        ),
+        # Bottom row
+        dcc.Graph(id="ts-lines", style={"height": "430px"}, className="mt-3"),
+        html.Div(id="ts-row-count", className="text-end text-muted mt-2"),
+    ],
+)
+
+layout = html.Div(
+    className="container-fluid py-4 rounded-2",
+    style={"backgroundColor": "#649ec784"},
+    children=[
+        html.Div(
+            className="text-center mb-4",
+            children=[
+                html.H2("Trends", className="text-light fw-bold"),
+                html.P("Explore how key metrics evolve over time.", className="text-light fw-bold"),
+            ],
+        ),
+        html.Div(
+            className="card shadow-sm rounded-2",
+            children=[
+                html.Div(
+                    className="card-body",
+                    children=[
+                        html.Div(
+                            className="row g-3",
+                            children=[controls_col, charts_col]
+                        )
+                    ]
+                )
+            ],
+        ),
+    ],
+)
+
+# ---------- Callbacks
 @callback(
     Output("ts-snapshot-table", "figure"),
     Output("ts-top10-yoy", "figure"),
