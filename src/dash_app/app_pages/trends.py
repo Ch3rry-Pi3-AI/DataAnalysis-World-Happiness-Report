@@ -142,6 +142,35 @@ _PRIMARY_METRIC = _DEFAULT_METRICS[0] if _DEFAULT_METRICS else None
 
 
 # ---------- layout
+
+charts_col = html.Div(
+    className="col-12 col-lg-9",
+    children=[
+        html.Div(
+            className="row g-3",
+            children=[
+                html.Div(
+                    className="col-12 col-xl-6",
+                    children=[
+                        html.H6("Latest Snapshot (by Country)", className="fw-bold mb-2"),
+                        dcc.Graph(id="ts-snapshot-table", style={"height": "360px"}),
+                    ]
+                ),
+                html.Div(
+                    className="col-12 col-xl-6",
+                    children=[
+                        html.H6("Top-10 YoY Change (Primary Metric)", className="fw-bold mb-2"),
+                        dcc.Graph(id="ts-top10-you", style={"height": "360px"}),
+                    ]
+                ),
+            ],
+        ),
+        # Bottom row
+        dcc.Graph(id="ts-lines", style={"height": "430px"}, className="mt-3"),
+        html.Div(id="ts-row-count", className="text-end text-muted mt-2"),
+    ],
+)
+
 layout = html.Div(
     className="container-fluid py-4 rounded-2",
     style={"backgroundColor": "#649ec784"},
