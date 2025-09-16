@@ -175,7 +175,43 @@ def _update_geo(year_value, region_values, metric):
         choropleth = px.choropleth(title="Select a metric")
             
     # Radial
+    reg_col = "gregional_indicator"
+    if metric and reg_col in df.columns and metric in df.columns:
+        rad_src = df[[reg_col, metric]].dropna(subset=[metric])
+        if rad_src.empty:
+            radial = px.pie(values=[1], names=["No data"], hold=0.6, title="Regional Radial")
+        else:
+            agg = rad_src.groupby(reg_col, asindex=False).agg(value=(metric, "mean"))
+            radial = px.pie(
+                agg,
+                names=reg_col,
+                values="value",
+                hold=0.55,
+                title=f"Regional Radial (mean {_labels(metric)})" + (f" · {int(year_value)}" if year_value else ""),
+            )
+            radial.update_traces(textposition="outside", texttemplate="%{label}<br>%{value:.2f}")
+            radial.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, showlegend=False)
+    else:
+        radial = px.pie(values=[1], names=["Select a metric"], hole=0.6, title="Regional Radial")
 
-    # Bar
+    # Bar top 10
+    if metric and "country_name" in df.columns and metric in df.columns:
+        top_src = df[["country_name", reg_col, metric]] if reg_col in df.columns else df[["country_name", metric]]
+        top_src = top_src.dropna(subset=[metric]).sort_values(metric, ascending=False).head(10)
+        if top_src.empty:
+            top10 = px.bar(title="Top 10 Countries — No data")
+        else:
+            top10 = px.bar(
+                top_src.sort_values(metric, ascending=True),  # small at bottom, big at top
+                x=metric,
+                y="country_name",
+                color=reg_col if reg_col in top_src.columns else None,
+                orientation="h",
+                hover_name="country_name",
+                title=f"Top 10 Countries by {_labels(metric)}" + (f" · {int(year_value)}" if year_value else ""),
+            )
+            top10.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, legend=dict(title="Region"))
+    else:
+        top10 = px.bar(title="Select a metric")
 
-    return choropleth
+    return choropleth, radial, top10, count_txt
