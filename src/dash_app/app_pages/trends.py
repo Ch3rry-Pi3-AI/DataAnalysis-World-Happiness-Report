@@ -71,7 +71,23 @@ def _make_snapshot_table(df: pd.DataFrame, metrics: list[str], latest_year: int)
             cells=dict(values=[snap[c].head(200) for c in snap.columns], align="left")
         )
     ])
-    
+
     fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
     return fig
 
+def _make_top10_yoy():
+    pass
+
+def _make_time_series():
+    pass
+
+# Data/defaults
+_BASE = _df().copy()
+if "year" in _BASE.columns:
+    _BASE["year"] = _BASE["year"].astype(int)
+_YEARS = sorted(pd.Series(_BASE["year"]).dropna().unique().tolist()) if "year" in _BASE.columns else None
+_YEAR_MIN = int(_YEARS[0]) if _YEARS else None
+_YEAR_MAX = int(_YEARS[-1]) if _YEARS else None
+
+_DEFAULT_METRICS = _default_ts_metrics(_BASE)
+_PRIMARY_METRIC = _DEFAULT_METRICS[0] if _DEFAULT_METRICS else None
