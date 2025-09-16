@@ -78,8 +78,32 @@ def _make_snapshot_table(df: pd.DataFrame, metrics: list[str], latest_year: int)
 def _make_top10_yoy():
     pass
 
-def _make_time_series():
-    pass
+def _make_time_series(df: pd.DataFrame, metrics: list[str]) -> go.Figure:
+    # Aggregat to mean for year for  each metric
+    need = [m for m in (metrics or []) if m in df.columns]
+    if "year" not in df.columns or not need:
+        return px.line(title="Select at least one metric")
+    
+    agg = (
+        df[["year"] + need]
+        .groupby("year", as_index=False)
+        .mean(numeric_only=True)
+        .sort_values("year")
+    )
+
+    # Multiple lines
+    long = agg.melt(id_vars="year", value_vars=need, var_name="metric", value_name="value")
+    fig = px.line(
+        long, x="year", 
+        y="value", 
+        color="metric", 
+        markers=True,
+        title="Trends Over Time (mean)",
+        labels={"value": "Value", "year": "Year", "metric": "Metric"}
+    )
+
+    fig.update_layout(margin={"t": 10, "l": 10, "r": 10, "b": 10})
+    return fig
 
 # Data/defaults
 _BASE = _df().copy()
