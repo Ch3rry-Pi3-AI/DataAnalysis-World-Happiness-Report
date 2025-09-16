@@ -42,7 +42,7 @@ def _apply_filters(df: pd.DataFrame, year_value, regions):
         df = df[df["regional_indicator"].isin(regions)]
     return df
 
-# ---------- Data / Defaults -----------
+# ---------- Data / Defaults
 _BASE = _df()
 _NUMS = _numeric_cols(_BASE)
 
@@ -88,3 +88,130 @@ controls_col = html.Div(
         html.Small("Tip: pick a year & metric, then refine by region.", className="text-muted"),
     ],
 )
+
+charts_col = html.Div(
+    className="col-12 col-lg-9",
+    children=[
+        # Top row: full-width choropleth
+        dcc.Graph(id="geo-choropleth", style={"height": "460px"}, className="mb-3"),
+        # Second row: radial (by region) + top 10 bar chart
+        html.Div(
+            className="row g-3",
+            children=[
+                html.Div(className="col-12 col-xl-6", children=[
+                    html.H6("Regional Radial", className="fw-bold mb-2"),
+                    dcc.Graph(id="geo-radial", style={"height": "360px"}),
+                ]),
+                html.Div(className="col-12 col-xl-6", children=[
+                    html.H6("Top 10 Countries", className="fw-bold mb-2"),
+                    dcc.Graph(id="geo-top10", style={"height": "360px"}),
+                ]),
+            ],
+        ),
+        html.Div(id="geo-row-count", className="text-end text-muted mt-2"),
+    ],
+)
+
+layout = html.Div(
+    className="container-fluid py-4 rounded-2",
+    style={"backgroundColor": "#649ec784"},
+    children=[
+        html.Div(
+            className="text-center mb-4",
+            children=[
+                html.H2("Global View", className="text-light fw-bold"),
+                html.P("Map, regional radial, and Top-10 countries for the seclected metric", className="text-light fw-bold"),
+            ],
+        ),
+        html.Div(
+            className="card shadow-sm rounded-2",
+            children=[
+                html.Div(
+                    className="card-body",
+                    children=[
+                        html.Div(className="row g-3", children=[controls_col, charts_col]),
+                    ]
+                )
+            ],
+        ),           
+    ],
+)
+
+# -------------- callbacks
+
+@callback(
+    Output("geo-choropleth", "figure"),
+    Output("geo-radial", "figure"),
+    Output("geo-top10", "figure"),
+    Output("geo-row-count", "children"),
+    Input("geo-year-dd", "value"),
+    Input("geo-region-dd", "value"),
+    Input("geo-metric-dd", "value"),
+)
+def _update_geo(year_value, region_values, metric):
+    df = _apply_filters(_df(), year_value, region_values)
+    count_txt = f"{len(df):,} matching rows"
+
+    # Chroropleth
+    if metric and "country_name" in df.columns and metric in df.columns:
+        map_df = df.dropna(subset=[metric, "country_name"])
+
+        if map_df.empty:
+            choropleth = px.choropleth(title="No data for selection")
+        else:
+            choropleth = px.choropleth(
+                map_df,
+                locations="country_name",
+                locationmode="country names",
+                color=metric,
+                hover_name="country_name",
+                hover_data=["regional_indicator", metric] if "regional_indicator" in map_df.columns else [metric],
+                color_continuous_scale="Viridis",
+                title=f"{_labels(metric)} — Choropleth" + (f" · {int(year_value)}" if year_value else ""),
+            )
+            choropleth.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, coloraxis_colorbar=dict(title=_labels(metric)))
+    else:
+        choropleth = px.choropleth(title="Select a metric")
+            
+    # Radial
+    reg_col = "regional_indicator"
+    if metric and reg_col in df.columns and metric in df.columns:
+        rad_src = df[[reg_col, metric]].dropna(subset=[metric])
+        if rad_src.empty:
+            radial = px.pie(values=[1], names=["No data"], hole=0.6, title="Regional Radial")
+        else:
+            agg = rad_src.groupby(reg_col, as_index=False).agg(value=(metric, "mean"))
+            radial = px.pie(
+                agg,
+                names=reg_col,
+                values="value",
+                hole=0.55,
+                title=f"Regional Radial (mean {_labels(metric)})" + (f" · {int(year_value)}" if year_value else ""),
+            )
+            radial.update_traces(textposition="outside", texttemplate="%{label}<br>%{value:.2f}")
+            radial.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, showlegend=False)
+    else:
+        radial = px.pie(values=[1], names=["Select a metric"], hole=0.6, title="Regional Radial")
+
+
+    # Bar top 10
+    if metric and "country_name" in df.columns and metric in df.columns:
+        top_src = df[["country_name", reg_col, metric]] if reg_col in df.columns else df[["country_name", metric]]
+        top_src = top_src.dropna(subset=[metric]).sort_values(metric, ascending=False).head(10)
+        if top_src.empty:
+            top10 = px.bar(title="Top 10 Countries — No data")
+        else:
+            top10 = px.bar(
+                top_src.sort_values(metric, ascending=True),  
+                x=metric,
+                y="country_name",
+                color=reg_col if reg_col in top_src.columns else None,
+                orientation="h",
+                hover_name="country_name",
+                title=f"Top 10 Countries by {_labels(metric)}" + (f" · {int(year_value)}" if year_value else ""),
+            )
+            top10.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, legend=dict(title="Region"))
+    else:
+        top10 = px.bar(title="Select a metric")
+
+    return choropleth, radial, top10, count_txt
