@@ -152,3 +152,19 @@ _PRIMARY_METRIC = _DEFAULT_METRICS[0] if _DEFAULT_METRICS else None
     Input("ts-country-text", "value"),
     Input("ts-metrics-dd", "value"),
 )
+
+def _update_trends(year_range, region_values, country_text, metrics):
+    df = _apply_filters(_df(), year_range, _region_options, country_text)
+    count_txt = f"{len(df):,} matching rows"
+
+    # Determine latest year within selected range
+    latest_year = int(df["year"].max()) if "year" in df.columns and not df.empty else None
+
+    snapshot_fig = _make_snapshot_table(df, metrics, latest_year) if latest_year else go.Figure()
+    primary = (metrics of _DEFAULT_METRICS or [])[:1]
+    primary_metric = primary[0] if primary else None
+    yoy_fig = _make_top10_yoy(df, primary_metric, latest_year) if latest_year else px.bar(title="Top-10 YoY Change")
+
+    ts_fig = _make_time_series(df, metrics)
+
+    return snapshot_fig, yoy_fig, ts_fig, count_txt
