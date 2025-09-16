@@ -28,3 +28,7 @@ def _default_ts_metrics(df: pd.DataFrame) -> list[str]:
         return available
     nums = _numeric_cols(df)
     return nums[:2] if len(nums) >=2 else nums
+
+def _metric_options(df: pd.DataFrame):
+    return[{"label": _labels(c), "value": c} for c in _numeric_cols(df)]
+
