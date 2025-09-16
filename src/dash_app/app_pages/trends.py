@@ -29,6 +29,31 @@ def _default_ts_metrics(df: pd.DataFrame) -> list[str]:
     nums = _numeric_cols(df)
     return nums[:2] if len(nums) >=2 else nums
 
+def _region_options(df: pd.DataFrame):
+    if "regional_indicator" not in df.columns:
+        return []
+    regs = sorted(pd.Series(df["regional_indicator"]).dropna().unique().tolist())
+    return [{"label": r, "value": r} for r in regs]
+
 def _metric_options(df: pd.DataFrame):
     return[{"label": _labels(c), "value": c} for c in _numeric_cols(df)]
+
+def _apply_filters(df: pd.DataFrame, year_range, regions, country_text):
+    # Year range
+    if year_range and "year" in df.columns:
+        y0, y1 = map(int, year_range)
+        df = df[(df["year"] >= y0) & (df["year"] <= y1)]
+
+    # Regions
+    if regions and "regional_indicator" in df.columns:
+        if not isinstance(regions, list):
+            regions = [regions]
+        df = df[df["regional_indicator"].isin(regions)]
+
+    # Country contains
+    if country_text and "country_name" in df.columns:
+        t = str(country_text).strip().lower()
+        if t:
+            df = df[df["country_name"].str.lower().str.contains(t, na=False)]
+        return df
 
