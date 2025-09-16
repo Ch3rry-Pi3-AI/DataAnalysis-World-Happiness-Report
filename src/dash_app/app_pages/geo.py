@@ -144,11 +144,10 @@ layout = html.Div(
     Output("geo-radial", "figure"),
     Output("geo-top10", "figure"),
     Output("geo-row-count", "children"),
-    Output("geo-year-dd", "value"),
-    Output("geo-region-dd", "value"),
-    Output("geo-metric-dd", "value"),
+    Input("geo-year-dd", "value"),
+    Input("geo-region-dd", "value"),
+    Input("geo-metric-dd", "value"),
 )
-
 def _update_geo(year_value, region_values, metric):
     df = _apply_filters(_df(), year_value, region_values)
     count_txt = f"{len(df):,} matching rows"
