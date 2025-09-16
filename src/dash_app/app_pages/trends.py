@@ -75,8 +75,15 @@ def _make_snapshot_table(df: pd.DataFrame, metrics: list[str], latest_year: int)
     fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
     return fig
 
-def _make_top10_yoy():
-    pass
+def _make_top10_yoy(df: pd.DataFrame, metric: str, latest_year: int) -> go.Figure:
+    if not metric or "year" not in df.columns or "country_name" not in df.columns:
+        return px.bar(title="Top-10 YoY Change (select a metric)")
+    
+    prev_year = latest_year - 1
+    now =df[df["year"] == latest_year][["country_name", "regional_indicator", metric]].rename(columns={metric: "now"})
+    prev = df[df["year"] == prev_year][["country_name", metric]].rename(columns={metric: "prev"})
+    merged = pd.merge(now, prev, on="country_name", how="left")
+    merged["yoy"] = merged["now"] - merged["prev"]
 
 def _make_time_series(df: pd.DataFrame, metrics: list[str]) -> go.Figure:
     # Aggregat to mean for year for  each metric
