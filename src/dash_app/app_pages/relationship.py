@@ -1,17 +1,33 @@
-# src/dash_app/app_pages/explore.py
+# ----------------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------------
+
+# Dash framework + primitives
 import dash
 from dash import html, dcc, Input, Output, callback
+
+# Data handling
 import pandas as pd
-import plotly.express as px
 import numpy as np
 
+# Plotting
+import plotly.express as px
+
+# Project data accessor
 from src.dash_app.data_access import get_gold_df
 
+
+# ----------------------------------------------------------------------
+# Page registration
+# ----------------------------------------------------------------------
+
+# Register the page so Dash discovers it at startup
 dash.register_page(__name__, path="/relationship", name="Relationship", order=2)
 
-# ---------------- Helpers ----------------
-def _df() -> pd.DataFrame:
-    return get_gold_df()
+# ----------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------
+
 
 def _numeric_cols(df: pd.DataFrame) -> list[str]:
     num = df.select_dtypes(include="number").columns.tolist()
@@ -39,13 +55,19 @@ def _region_options(df: pd.DataFrame):
 def _labels(s: str) -> str:
     return s.replace("_", " ").title()
 
-# ---------------- Data / Defaults ----------------
+# ----------------------------------------------------------------------
+# Data / Defaults
+# ----------------------------------------------------------------------
+
 _BASE = _df()
 _NUMS = _numeric_cols(_BASE)
 _DEFAULT_X = _NUMS[0] if _NUMS else None
 _DEFAULT_Y = _NUMS[1] if len(_NUMS) > 1 else _DEFAULT_X
 
-# ---------------- Layout ----------------
+# ----------------------------------------------------------------------
+# Layout (modular: controls_col, plots_col, layout)
+# ----------------------------------------------------------------------
+
 controls_col = html.Div(
     className="col-12 col-lg-3",
     children=[
@@ -128,7 +150,10 @@ layout = html.Div(
     ],
 )
 
-# ---------------- Callbacks ----------------
+# ----------------------------------------------------------------------
+# Callbacks
+# ----------------------------------------------------------------------
+
 def _apply_filters(df: pd.DataFrame, year_value, regions):
     if year_value is not None and "year" in df.columns:
         df = df[df["year"] == int(year_value)]
