@@ -171,8 +171,15 @@ controls_col = html.Div(
         html.Div(style={"height": "8px"}),
 
         html.Label("Country contains", className="form-label mb-1"),
+        dcc.Input(
+            id="ts-country-text",
+            type="text",
+            placeholder="e.g., 'Uni' for 'Unitied ...'",
+            style={"width": "100%", "fontSize": "12px"},
+        ),
+        html.Div(styl={"height": "8px"})
 
-        html.Label("Metrics (time series)", className="form-label mb-1")
+        # html.Label("Metrics (time series)", className="form-label mb-1"),
     ]
 )
 
