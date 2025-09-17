@@ -149,7 +149,7 @@ controls_col = html.Div(
         html.H5("Filters", className="fw=bold mb-3"),
         
         html.Label("Year range", className="form-label mb-1"),
-        dcc.Rangeslider(
+        dcc.RangeSlider(
             id="ts-year-range",
             min=_YEAR_MIN or 0,
             max=_YEAR_MAX or 0,
@@ -177,10 +177,21 @@ controls_col = html.Div(
             placeholder="e.g., 'Uni' for 'Unitied ...'",
             style={"width": "100%", "fontSize": "12px"},
         ),
-        html.Div(styl={"height": "8px"})
+        html.Div(style={"height": "8px"}),
 
-        # html.Label("Metrics (time series)", className="form-label mb-1"),
-    ]
+        html.Label("Metrics (time series)", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ts-matrics-dd",
+            options=_metric_options(_BASE),
+            value=_DEFAULT_METRICS,
+            multi=True,
+            clearable=False,
+            style={"fontSize": "12px"}
+        ),
+
+        html.Hr(),
+        html.Small("Top row uses the latest year in the selected range. Time series shows means per year.", className="text-muted"),
+    ],
 )
 
 
