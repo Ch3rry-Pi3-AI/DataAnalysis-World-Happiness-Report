@@ -1,41 +1,138 @@
-# src/dash_app/app_pages/dataset.py
+# ----------------------------------------------------------------------
+# Imports
+# ----------------------------------------------------------------------
+
+# Dash framework + primitives
 import dash
 from dash import html, dcc, Input, Output, callback
+
+# Data handling
 import pandas as pd
 import numpy as np
+
+# Plotting (table figures)
 import plotly.graph_objects as go
 
+# Project data accessor
 from src.dash_app.data_access import get_gold_df
 
+# ----------------------------------------------------------------------
+# Page registration
+# ----------------------------------------------------------------------
+
+# Register the page so Dash discovers it at startup
 dash.register_page(__name__, path="/dataset", name="Dataset 📋", order=1)
 
-# ---------------- Helpers ----------------
+# ----------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------
+
 def _df() -> pd.DataFrame:
+    """
+    Return the gold dataset used across pages.
+
+    Isolated so that:
+    - unit tests can inject a small DataFrame,
+    - other pages can reuse the same loader.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Gold dataset.
+    """
     return get_gold_df()
 
+
 def _numeric_cols(df: pd.DataFrame) -> list[str]:
+    """
+    Return numeric column names.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataset to inspect.
+
+    Returns
+    -------
+    list of str
+        Numeric columns.
+    """
     return df.select_dtypes(include="number").columns.tolist()
 
 def _text_cols(df: pd.DataFrame) -> list[str]:
+    """
+    Return non-numeric (text/categorical) column names.
+    
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    
+    Returns
+    -------
+    list of str
+        Non-numeric columns.
+    """
+    
     return df.select_dtypes(exclude="number").columns.tolist()
 
 def _year_options(df: pd.DataFrame):
+    """
+    Build (label, value) options for the Year drop-down.
+
+    Returns empty list if 'year' is missing.
+    """
+    
+    if "year" not in df.columns:
+        return []
+
     years = sorted(pd.Series(df["year"]).dropna().unique().tolist()) if "year" in df.columns else []
+
     return [{"label": str(int(y)), "value": int(y)} for y in years]
 
 def _region_options(df: pd.DataFrame):
+    """
+    Build (label, value) options for Region(s).
+
+    Returns empty list if 'regional_indicator' column is missing. 
+    """
+    
     if "regional_indicator" not in df.columns:
         return []
+    
     regs = sorted(pd.Series(df["regional_indicator"]).dropna().unique().tolist())
     return [{"label": r, "value": r} for r in regs]
 
 def _labels(s: str) -> str:
+    """
+    Reformat snake_case columns
+    """
+    
     return s.replace("_", " ").title()
 
 def _col_options(df: pd.DataFrame):
+    """
+    Build (label, value) options for the main-table column selector.
+    """
+    
     return [{"label":_labels(c), "value": c} for c in df.columns]
 
 def _make_table_figure(df: pd.DataFrame, max_rows: int = 200) -> go.Figure:
+    """
+    Render a simple pageless table with the first 'max_rows' number of rows.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Data to render (with filtered/column-selected).
+    max_rows : int, optional
+        Row cap for display. (Default: 200).
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Table figure.
+    """
+    
     df_show = df.head(max_rows)
     cols = list(df_show.columns)
     header_vals = [_labels(c) for c in cols]
@@ -54,13 +151,31 @@ def _make_table_figure(df: pd.DataFrame, max_rows: int = 200) -> go.Figure:
     return fig
 
 def _make_overall_summary(df: pd.DataFrame, metric: str) -> go.Figure:
+    """
+    Overall (global) summary stats for a chosen metric.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Filtered dataset.
+    metric : str
+        Column name to summarise.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Table figure with summary stats.
+    """
+    
     if metric not in df.columns or df[metric].dropna().empty:
         return go.Figure(data=[go.Table(
             header=dict(values=["Notice", "Detail"], align="left"),
             cells=dict(values=[["Info"], ["Select a metric with data"]], align="left"),
         )])
+    
     s = df[metric].dropna()
-    # Robust stats
+    
+    # Stats block
     stats = pd.DataFrame({
         "stat": ["count", "mean", "std", "min", "25%", "50%", "75%", "max"],
         "value": [
@@ -74,14 +189,18 @@ def _make_overall_summary(df: pd.DataFrame, metric: str) -> go.Figure:
             s.max(),
         ],
     })
-    stats["value"] = stats["value"].astype(float).round(3)
+
+    stats["value"] = stats["value"].astype(float).round(1)
+    
     fig = go.Figure(data=[
         go.Table(
             header=dict(values=[_labels(metric), "Value"], align="left"),
             cells=dict(values=[stats["stat"], stats["value"]], align="left"),
         )
     ])
+
     fig.update_layout(margin={"t": 0, "l": 0, "r": 0, "b": 0})
+    
     return fig
 
 def _make_regional_summary(df: pd.DataFrame, metric: str) -> go.Figure:
