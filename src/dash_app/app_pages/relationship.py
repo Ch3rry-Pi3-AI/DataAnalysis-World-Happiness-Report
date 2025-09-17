@@ -28,9 +28,42 @@ dash.register_page(__name__, path="/relationship", name="Relationship", order=2)
 # Helpers
 # ----------------------------------------------------------------------
 
+def _df() -> pd.DataFrame:
+    """
+    Return the gold dataset used across pages.
+
+    Isolated so that:
+    - unit tests can inject a small DataFrame,
+    - other pages can reuse the same loader.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Gold dataset.
+    """
+
+    return get_gold_df()
 
 def _numeric_cols(df: pd.DataFrame) -> list[str]:
+    """
+    Return numeric columns, preferring headline metrics first.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataset to inspect.
+    
+    Returns
+    -------
+    list of str
+        Ordered list of numeric column names with headline
+        metrics (if present) at the front.
+    """
+    
+    # All numeric columns
     num = df.select_dtypes(include="number").columns.tolist()
+    
+    # Headline columns to prioritise in drop-downs
     headline = [
         "ladder_score",
         "logged_gdp_per_capita",
@@ -40,27 +73,81 @@ def _numeric_cols(df: pd.DataFrame) -> list[str]:
         "generosity",
         "perceptions_of_corruption",
     ]
+
+    # Headline columns first, followed by any remaining numeric columns in df
     return [c for c in headline if c in num] + [c for c in num if c not in headline]
 
 def _year_options(df: pd.DataFrame):
+    """
+    Build (label, value) options for the Year drop-down.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataset containing a 'year' column.
+
+    Returns
+    -------
+    list of dict
+        Dash-friendly options; empty list if no 'year'.
+    """
+    
+    if "year" not in df.columns:
+        return []
+    
     years = sorted(pd.Series(df["year"]).dropna().unique().tolist()) if "year" in df.columns else []
+    
     return [{"label": str(int(y)), "value": int(y)} for y in years]
 
 def _region_options(df: pd.DataFrame):
+    """
+    Build (label, value) options for the Region(s) drop-down.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataset containing a 'regional_indicator' column.
+    
+    Returns
+    -------
+    list of dict
+        Dash-friendly options; empty list if no region column.
+    """
+    
     if "regional_indicator" not in df.columns:
         return []
+    
     regs = sorted(pd.Series(df["regional_indicator"]).dropna().unique().tolist())
+    
     return [{"label": r, "value": r} for r in regs]
 
 def _labels(s: str) -> str:
+    """
+    Re-format labels from snake_case.
+
+    Parameters
+    ----------
+    s : str
+        Raw column name.
+
+    Returns
+    -------
+    str
+        Title-cased label with underscores replaced by spaces. 
+    """
+    
     return s.replace("_", " ").title()
 
 # ----------------------------------------------------------------------
 # Data / Defaults
 # ----------------------------------------------------------------------
 
+# Cache a copy for helper options
 _BASE = _df()
+
+# Numeric columns for X/Y selectors
 _NUMS = _numeric_cols(_BASE)
+
 _DEFAULT_X = _NUMS[0] if _NUMS else None
 _DEFAULT_Y = _NUMS[1] if len(_NUMS) > 1 else _DEFAULT_X
 
