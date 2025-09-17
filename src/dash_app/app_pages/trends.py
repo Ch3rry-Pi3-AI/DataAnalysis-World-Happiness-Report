@@ -143,6 +143,47 @@ _PRIMARY_METRIC = _DEFAULT_METRICS[0] if _DEFAULT_METRICS else None
 
 # ---------- layout
 
+controls_col = html.Div(
+    className="col-12 col-lg-3",
+    children=[
+        html.H5("Filters", className="fw=bold mb-3"),
+        
+        html.Label("Year range", className="form-label mb-1"),
+        dcc.Rangeslider(
+            id="ts-year-range",
+            min=_YEAR_MIN or 0,
+            max=_YEAR_MAX or 0,
+            value=[min, max],
+            marks={int(y): str(int(y)) for y in _YEARS[:1] + _YEARS[1:: max(1, len(_YEARS)//6)] + _YEARS[-1:] } if _YEARS else None,
+            tooltip={"always_visible": False, "placement": "bottom"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("Regions(s)", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ts-region-dd",
+            options=_region_options(_BASE),
+            placeholder="(optional)",
+            multi=True,
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        html.Label("Country contains", className="form-label mb-1"),
+        dcc.Input(
+            id="ts-country-text",
+            type="text",
+            placeholder="e.g., 'Uni' for 'Unitied ...'",
+            style={"width": "100%", "fontSize": "12px"},
+        ),
+        html.Div(styl={"height": "8px"})
+
+        # html.Label("Metrics (time series)", className="form-label mb-1"),
+    ]
+)
+
+
 charts_col = html.Div(
     className="col-12 col-lg-9",
     children=[
