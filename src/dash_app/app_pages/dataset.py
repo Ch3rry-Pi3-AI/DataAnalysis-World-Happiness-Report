@@ -470,6 +470,7 @@ layout = html.Div(
     Input("ds-colselect-dd", "value"),
     Input("ds-metric-dd", "value"),
 )
+
 def _update_dataset_page(year_value, region_values, country_text, selected_cols, metric):
     """
     Update the main (pageless) table and the two summary tables.

@@ -317,7 +317,7 @@ def _update_geo(year_value, region_values, metric):
                 hover_name="country_name",
                 hover_data=["regional_indicator", metric] if "regional_indicator" in map_df.columns else [metric],
                 color_continuous_scale="Viridis",
-                title=f"{_labels(metric)} — Choropleth" + (f" · {int(year_value)}" if year_value else ""),
+                title=f"{_labels(metric)} - Choropleth" + (f" · {int(year_value)}" if year_value else ""),
             )
             choropleth.update_layout(
                 margin={"t": 70, "l": 10, "r": 10, "b": 10},
@@ -356,7 +356,7 @@ def _update_geo(year_value, region_values, metric):
         top_src = top_src.dropna(subset=[metric]).sort_values(metric, ascending=False).head(10)
 
         if top_src.empty:
-            top10 = px.bar(title="Top 10 Countries — No data")
+            top10 = px.bar(title="Top 10 Countries - No data")
         
         else:
             top10 = px.bar(
