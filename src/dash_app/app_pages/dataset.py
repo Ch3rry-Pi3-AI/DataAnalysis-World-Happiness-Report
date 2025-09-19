@@ -59,19 +59,19 @@ def _numeric_cols(df: pd.DataFrame) -> list[str]:
     """
     return df.select_dtypes(include="number").columns.tolist()
 
-def _text_cols(df: pd.DataFrame) -> list[str]:
-    """
-    Return non-numeric (text/categorical) column names.
+# def _text_cols(df: pd.DataFrame) -> list[str]:
+#     """
+#     Return non-numeric (text/categorical) column names.
     
-    Parameters
-    ----------
-    df : pandas.DataFrame
+#     Parameters
+#     ----------
+#     df : pandas.DataFrame
     
-    Returns
-    -------
-    list of str
-        Non-numeric columns.
-    """
+#     Returns
+#     -------
+#     list of str
+#         Non-numeric columns.
+#     """
     
     return df.select_dtypes(exclude="number").columns.tolist()
 
@@ -85,9 +85,20 @@ def _year_options(df: pd.DataFrame):
     if "year" not in df.columns:
         return []
 
-    years = sorted(pd.Series(df["year"]).dropna().unique().tolist()) if "year" in df.columns else []
+    years = sorted(pd.Series(df["year"]).dropna().unique().tolist(), reverse=True) if "year" in df.columns else []
 
     return [{"label": str(int(y)), "value": int(y)} for y in years]
+
+def _default_years(df: pd.DataFrame) -> list[int]:
+    """
+    Default selected year(s) for the Year control.
+
+    Use '2021' if present; otherwise leave empty.
+    """
+
+    if "year" in df.columns and 2021 in set(pd.Series(df["year"]).dropna().astype(int)):
+        return[2021]
+    return []
 
 def _region_options(df: pd.DataFrame):
     """
@@ -273,7 +284,9 @@ def _apply_filters(df: pd.DataFrame, year_value, regions, country_text) -> pd.Da
 
     # Year filter
     if year_value is not None and "year" in df.columns:
-        df = df[df["year"] == int(year_value)]
+        if not isinstance(year_value, list):
+            year_value=[year_value]
+        df = df[df["year"].astype(int).isin([int(y) for y in year_value])]
 
     # Region(s) filter
     if regions and "regional_indicator" in df.columns:
@@ -308,6 +321,9 @@ _DEFAULT_COLUMNS = [
     if c in _BASE.columns
 ]
 
+# Default year(s) for filter
+_DEFAULT_YEARS = _default_years(_BASE)
+
 # ----------------------------------------------------------------------
 # Layout (modular: controls_col, tables_col, layout)
 # ----------------------------------------------------------------------
@@ -318,11 +334,13 @@ controls_col = html.Div(
     children=[
         html.H5("Filters", className="fw-bold mb-3"),
 
-        # Year (optional)
+        # Year (optional, multi)
         html.Label("Year", className="form-label mb-1"),
         dcc.Dropdown(
             id="ds-year-dd",
             options=_year_options(_BASE),
+            value=_DEFAULT_YEARS,
+            multi=True,
             placeholder="(optional)",
             clearable=True,
             style={"fontSize": "12px"},
@@ -388,7 +406,7 @@ tables_col = html.Div(
     className="col-12 col-lg-9",
     children=[
         # Top: full-width main table
-        dcc.Graph(id="ds-main-table", style={"height": "420px"}, className="mb-3"),
+        dcc.Graph(id="ds-main-table", style={"height": "300px"}, className="mb-3"),
 
         # Second row: two summary tables side-by-side
         html.Div(
@@ -410,10 +428,6 @@ tables_col = html.Div(
                 ),
             ],
         ),
-
-        # Row count + hint
-        html.Div(id="ds-row-count", className="text-end text-muted mt-2"),
-        html.Small("Main table shows up to 200 rows.", className="d-block text-end text-muted"),
     ],
 )
 
@@ -450,7 +464,6 @@ layout = html.Div(
     Output("ds-main-table", "figure"),
     Output("ds-summary-overall", "figure"),
     Output("ds-summary-region", "figure"),
-    Output("ds-row-count", "children"),
     Input("ds-year-dd", "value"),
     Input("ds-region-dd", "value"),
     Input("ds-country-text", "value"),
@@ -479,7 +492,4 @@ def _update_dataset_page(year_value, region_values, country_text, selected_cols,
     overall_fig = _make_overall_summary(df, fallback_metric) if fallback_metric else _make_overall_summary(df, metric)
     regional_fig = _make_regional_summary(df, fallback_metric) if fallback_metric else _make_regional_summary(df, metric)
 
-    # Nicely formatted row count
-    count_txt = f"{len(df):,} matching rows"
-
-    return main_table_fig, overall_fig, regional_fig, count_txt
+    return main_table_fig, overall_fig, regional_fig

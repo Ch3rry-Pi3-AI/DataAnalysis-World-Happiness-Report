@@ -17,7 +17,6 @@ import plotly.graph_objects as go
 # Project data accessor
 from src.dash_app.data_access import get_gold_df
 
-
 # ----------------------------------------------------------------------
 # Page registration
 # ----------------------------------------------------------------------
