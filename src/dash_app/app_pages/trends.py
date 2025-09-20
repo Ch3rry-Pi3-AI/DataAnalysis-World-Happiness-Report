@@ -452,3 +452,45 @@ layout = html.Div(
         ),
     ],
 )
+
+# ----------------------------------------------------------------------
+# Callbacks
+# ----------------------------------------------------------------------
+
+@callback(
+    Output("ts-top-change", "figure"),
+    Output("ts-lines", "figure"),
+    Input("ts-year-range", "value"),
+    Input("ts-region-dd", "value"),
+    Input("ts-country-text", "value"),
+    Input("ts-metric-dd", "value"),
+)
+def _update_trends(year_range, region_values, country_text, metric):
+    """
+    Update the Top-10 change bar (top) and the region-mean time series (bottom).
+
+    Notes
+    -----
+    - Top bar uses delta between the first and last years selected in the slider.
+    - Time series shows mean per year across regions for the chosen metric.
+    - Colours for regions are consistent across both charts.
+    """
+    
+    df = _apply_filters(_df(), year_range, region_values, country_text)
+
+    # Guard: need valid year bounds
+    start_year, end_year = (None, None)
+    if year_range and "year" in df.columns and not df.empty:
+        start_year, end_year = map(int, year_range)
+
+    # Build figures
+    if start_year is not None and end_year is not None and metric:
+        top_change_fig = _make_top_change_between_bounds(
+            df, metric, start_year, end_year, color_map=_REGION_CMAP, top_n=10
+        )
+    else:
+        top_change_fig = px.bar(title="Top Change (select a metric and valid year range)")
+
+    ts_fig = _make_time_series(df, metric, color_map=_REGION_CMAP)
+
+    return top_change_fig, ts_fig
