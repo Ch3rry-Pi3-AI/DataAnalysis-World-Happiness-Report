@@ -41,18 +41,13 @@ def _df() -> pd.DataFrame:
     pandas.DataFrame
         Gold dataset.
     """
-    
+
     return get_gold_df()
 
 
 def _labels(s: str) -> str:
     """
-    Humanise snake_case labels for display.
-
-    Examples
-    --------
-    >>> _labels("ladder_score")
-    'Ladder Score'
+    Reformat snake_case labels for display.
     """
 
     return s.replace("_", " ").title()
@@ -198,3 +193,157 @@ def _apply_filters(df: pd.DataFrame, year_range, regions, country_text) -> pd.Da
             df = df[df["country_name"].str.lower().str.contains(t, na=False)]
 
     return df
+
+def _make_top_change_between_bounds(
+    df: pd.DataFrame,
+    metric: str,
+    start_year: int,
+    end_year: int,
+    color_map: dict[str, str],
+    top_n: int = 10,
+) -> go.Figure:
+    """
+    Top-N change between the **first and last** years selected in the slider.
+
+    Change is computed as: delta = value(end_year) - value(start_year)
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Filtered dataset (already subset to the year range + any region/country filters).
+    metric : str
+        Metric for which to compute the change.
+    start_year : int
+        First (left handle) year from slider.
+    end_year : int
+        Last (right handle) year from slider.
+    color_map : dict[str, str]
+        Mapping of region -> colour used across both charts.
+    top_n : int
+        Number of countries with the largest positive change to show.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Horizontal bar chart of Top-N changes, colour by region (if available),
+        with labelised axes and visible legend.
+    """
+
+    reg_col = "regional_indicator"
+
+    if not metric or "year" not in df.columns or "country_name" not in df.columns:
+        return px.bar(title="Top Change (select a metric)")
+
+    # Current & base snapshots
+    end = df[df["year"] == int(end_year)][["country_name", reg_col, metric]].rename(columns={metric: "end"})
+    start = df[df["year"] == int(start_year)][["country_name", metric]].rename(columns={metric: "start"})
+
+    # Inner-join on countries so both endpoints exist
+    merged = pd.merge(end, start, on="country_name", how="inner")
+    if merged.empty:
+        return px.bar(title=f"Top Change in {_labels(metric)} · {start_year}→{end_year} (no overlapping countries)")
+
+    merged["delta"] = merged["end"] - merged["start"]
+
+    # Keep Top-N positive changes (largest first)
+    top = merged.sort_values("delta", ascending=False).head(top_n)
+
+    if top.empty:
+        return px.bar(title=f"Top Change in {_labels(metric)} · {start_year}→{end_year} (no change)")
+
+    # Explicitly order Y so the largest delta appears at the TOP (descending)
+    y_order = top.sort_values("delta", ascending=False)["country_name"].tolist()
+
+    fig = px.bar(
+        top,
+        x="delta",
+        y="country_name",
+        orientation="h",
+        color=reg_col if reg_col in top.columns else None,
+        color_discrete_map=color_map,
+        hover_data={"start": True, "end": True, "delta": ":.2f"},
+        title=f"Top 10 Change in {_labels(metric)} · {start_year}→{end_year}",
+        labels={
+            "delta": f"delta {_labels(metric)}",
+            "country_name": "Country",
+            reg_col: "Region",
+        },
+    )
+    fig.update_layout(
+        xaxis_title=f"delta {_labels(metric)}",
+        yaxis_title="Country",
+        showlegend=True,  # keep legend visible (now we have full width)
+        margin={"t": 70, "l": 10, "r": 10, "b": 10},
+        yaxis=dict(categoryorder="array", categoryarray=y_order),  # largest delta at TOP
+    )
+    return fig
+
+
+def _make_time_series(df: pd.DataFrame, metric: str, color_map: dict[str, str]) -> go.Figure:
+    """
+    Region-mean time series for a single chosen metric.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Filtered dataset.
+    metric : str
+        One metric to plot across time.
+    color_map : dict[str, str]
+        Mapping of region -> colour, shared with the bar chart.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Line chart of mean values per year for each region (legend = Region).
+    """
+
+    reg_col = "regional_indicator"
+    if "year" not in df.columns or metric not in df.columns or reg_col not in df.columns:
+        return px.line(title="Select a metric")
+
+    # Aggregate mean by year and region for the chosen metric
+    agg = (
+        df[["year", reg_col, metric]]
+        .groupby(["year", reg_col], as_index=False)
+        .mean(numeric_only=True)
+        .sort_values(["year", reg_col])
+    )
+
+    fig = px.line(
+        agg,
+        x="year",
+        y=metric,
+        color=reg_col,                       
+        color_discrete_map=color_map,        
+        markers=True,
+        title=f"Trends Over Time — {_labels(metric)} (mean by Region)",
+        labels={
+            metric: _labels(metric),
+            "year": "Year",
+            reg_col: "Region",
+        },
+    )
+    fig.update_layout(
+        xaxis_title="Year",
+        yaxis_title=_labels(metric),
+        margin={"t": 70, "l": 10, "r": 10, "b": 10},
+    )
+    return fig
+
+# ----------------------------------------------------------------------
+# Data / Defaults
+# ----------------------------------------------------------------------
+
+_BASE = _df().copy()
+if "year" in _BASE.columns:
+    _BASE["year"] = _BASE["year"].astype(int)
+
+_YEARS = sorted(pd.Series(_BASE["year"]).dropna().unique().tolist()) if "year" in _BASE.columns else []
+_YEAR_MIN = int(_YEARS[0]) if _YEARS else 0
+_YEAR_MAX = int(_YEARS[-1]) if _YEARS else 0
+
+_DEFAULT_METRIC = _default_metric(_BASE)  
+
+# Precompute a consistent region colour map for both charts
+_REGION_CMAP = _region_color_map(_BASE)
