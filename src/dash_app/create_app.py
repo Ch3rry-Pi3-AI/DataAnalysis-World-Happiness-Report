@@ -95,6 +95,7 @@ def dashboard(enable_pages: bool = True) -> Dash:
     )
 
     #----------------- Manual router callback -------------------#
+    
     if not enable_pages:
         app.layout.children.append(dcc.Location(id="url"))
 
