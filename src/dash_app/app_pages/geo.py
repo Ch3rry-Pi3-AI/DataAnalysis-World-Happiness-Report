@@ -362,6 +362,11 @@ def _update_geo(year_value, region_values, metric):
                 orientation="h",
                 hover_name="country_name",
                 title=f"Top 10 Countries by {_labels(metric)}" + (f" · {int(year_value)}" if year_value else ""),
+                labels={
+                    metric: _labels(metric),          
+                    "country_name": "Country",        
+                    "regional_indicator": "Region",   
+                },
             )
             top10.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, legend=dict(title="Region"))
     
