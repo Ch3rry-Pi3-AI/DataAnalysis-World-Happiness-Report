@@ -130,7 +130,7 @@ def _smart_year_marks(years: list[int], max_ticks: int = 8) -> dict[int, str] | 
     if len(years) <= max_ticks:
         return {int(y): str(int(y)) for y in years}
     
-    # Evenly sample years for labels (always include ends)
+    # Evenly sample years for labels (keep ends)
     idxs = np.linspace(0, len(years) - 1, num=max_ticks, dtype=int)
     sampled = sorted(set(years[i] for i in idxs))
     return {int(y): str(int(y)) for y in sampled}
@@ -347,3 +347,108 @@ _DEFAULT_METRIC = _default_metric(_BASE)
 
 # Precompute a consistent region colour map for both charts
 _REGION_CMAP = _region_color_map(_BASE)
+
+# ----------------------------------------------------------------------
+# Layout (controls_col, charts_col, layout)
+# ----------------------------------------------------------------------
+
+# Left column: filters & metric selection
+controls_col = html.Div(
+    className="col-12 col-lg-3",
+    children=[
+        html.H5("Filters", className="fw-bold mb-3"),
+
+        # Year range: smart marks to avoid crowding.
+        html.Label("Year range", className="form-label mb-1"),
+        dcc.RangeSlider(
+            id="ts-year-range",
+            min=_YEAR_MIN,
+            max=_YEAR_MAX,
+            value=[_YEAR_MIN, _YEAR_MAX],
+            step=1,
+            marks=_smart_year_marks(_YEARS, max_ticks=8),  # sparse, readable labels
+            allowCross=False,
+            tooltip={"always_visible": False, "placement": "bottom"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        # Region(s)
+        html.Label("Region(s)", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ts-region-dd",
+            options=_region_options(_BASE),
+            placeholder="(optional)",
+            multi=True,
+            clearable=True,
+            style={"fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        # Country contains
+        html.Label("Country contains", className="form-label mb-1"),
+        dcc.Input(
+            id="ts-country-text",
+            type="text",
+            placeholder="e.g., 'Uni' for 'United...'",
+            style={"width": "100%", "fontSize": "12px"},
+        ),
+        html.Div(style={"height": "8px"}),
+
+        # Metric (SINGLE select)
+        html.Label("Metric", className="form-label mb-1"),
+        dcc.Dropdown(
+            id="ts-metric-dd",
+            options=_metric_options(_BASE),
+            value=_DEFAULT_METRIC,      # default to Ladder Score if present
+            multi=False,                # <-- single metric
+            clearable=False,
+            style={"fontSize": "12px"},
+        ),
+
+        html.Hr(),
+        html.Small(
+            "Top chart: Top-10 country change between the first and last years selected. "
+            "Bottom chart: regional mean time series for the chosen metric.",
+            className="text-muted",
+        ),
+    ],
+)
+
+# Right column: Top change (full width) + time series (full width)
+charts_col = html.Div(
+    className="col-12 col-lg-9",
+    children=[
+        # Full-width Top Change barplot (shows legend)
+        dcc.Graph(id="ts-top-change", style={"height": "380px"}, className="mb-3"),
+
+        # Full-width time series (legend = Region, colour map aligned)
+        dcc.Graph(id="ts-lines", style={"height": "430px"}),
+    ],
+)
+
+# Page container (top-level)
+layout = html.Div(
+    className="container-fluid py-4 rounded-2",
+    style={"backgroundColor": "#649ec784"},
+    children=[
+        # Title block
+        html.Div(
+            className="text-center mb-4",
+            children=[
+                html.H2("Trends", className="text-light fw-bold"),
+                html.P("Explore how key metrics evolve over time.", className="text-light fw-bold"),
+            ],
+        ),
+
+        # Card containing controls + charts
+        html.Div(
+            className="card shadow-sm rounded-2",
+            children=[
+                html.Div(
+                    className="card-body",
+                    children=[html.Div(className="row g-3", children=[controls_col, charts_col])],
+                )
+            ],
+        ),
+    ],
+)
