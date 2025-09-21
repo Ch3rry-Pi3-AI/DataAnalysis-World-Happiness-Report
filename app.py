@@ -18,7 +18,6 @@ Notes
 # ----------------------------------------------------------------------
 from src import (
     get_world_happiness_data,   # src/get_data/import_happiness_data.py
-    fetch_geolocation_data,     # src/get_data/import_geolocation_data.py
     load_all_bronze_data,       # src/preprocess_data/load_bronze_data.py
     BronzeToSilver,             # src/preprocess_data/clean_bronze_data.py
 )
@@ -33,13 +32,12 @@ if __name__ == "__main__":
     # Stage 1: Download bronze datasets
     # ------------------------------------------------------------------
     get_world_happiness_data(verbose=True)
-    fetch_geolocation_data(verbose=True)
     print("✅ Bronze downloaded 🥉.\n")
 
     # ------------------------------------------------------------------
     # Stage 1b: Load bronze datasets
     # ------------------------------------------------------------------
-    multi_df, y2021_df, geo_df = load_all_bronze_data(verbose=True)
+    multi_df, y2021_df = load_all_bronze_data(verbose=True)
     print("✅ Bronze loaded 🥉.\n")
 
     # ------------------------------------------------------------------
@@ -55,12 +53,7 @@ if __name__ == "__main__":
     y2021_clean = cleaner.clean_y2021(y2021_df)
     print("✅ 2021-only cleaned.\n")
 
-    # Clean geolocation data
-    geo_clean = cleaner.clean_geolocation(geo_df)
-    print("✅ Geolocation cleaned.\n")
-
     # Save each cleaned DataFrame to silver
     cleaner.save_multi(multi_clean)       # data/silver/world_happiness_multi_silver.csv
     cleaner.save_y2021(y2021_clean)       # data/silver/world_happiness_2021_silver.csv
-    cleaner.save_geolocation(geo_clean)   # data/silver/geolocation_silver.csv
     print("✅ All cleaned data saved to 🥈 folder.\n")
