@@ -2,13 +2,12 @@
 Simple entry point for the World Happiness pipeline.
 
 This script:
-1) Downloads bronze datasets (World Happiness + Geolocation).
+1) Downloads bronze datasets (World Happiness).
 2) Loads bronze data.
 3) Cleans and saves to silver.
 4) Loads silver data (mirrors bronze loader style).
-5) [Optional] Runs Stage 3 feature engineering to append 2021 into multi-year
-   and merge with geolocation.
-6) Runs Silver → Gold to produce the final dataset in `data/gold/`.
+5) Runs Silver → Gold to append 2021 into the multi-year dataset and save.
+6) Loads the final Gold dataset from `data/gold/`.
 
 Notes
 -----
@@ -25,7 +24,6 @@ Notes
 # Existing imports exposed via src/__init__.py
 from src import (
     get_world_happiness_data,   # src/get_data/import_happiness_data.py
-    fetch_geolocation_data,     # src/get_data/import_geolocation_data.py
     load_all_bronze_data,       # src/preprocess_data/load_bronze_data.py
     BronzeToSilver,             # src/preprocess_data/clean_bronze_data.py
     load_all_silver_data,       # src/feature_engineering/load_silver_data.py
@@ -40,11 +38,10 @@ from src import (
 if __name__ == "__main__":
 
     # ------------------------------------------------------------------
-    # Stage 1: Download bronze datasets
+    # Stage 1: Download bronze datasets (World Happiness only)
     # ------------------------------------------------------------------
 
     get_world_happiness_data(verbose=True)
-    fetch_geolocation_data(verbose=True)
     print("✅ Bronze downloaded 🥉.\n")
 
     # ------------------------------------------------------------------
@@ -52,11 +49,11 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------
 
     # Mirrors the style used in load_bronze_data.py (friendly prints)
-    multi_df, y2021_df, geo_df = load_all_bronze_data(verbose=True)
+    multi_df, y2021_df = load_all_bronze_data(verbose=True)
     print("✅ Bronze loaded 🥉.\n")
 
     # ------------------------------------------------------------------
-    # Stage 2: Clean bronze -> silver (three independent cleaners)
+    # Stage 2: Clean bronze -> silver (two independent cleaners)
     # ------------------------------------------------------------------
 
     cleaner = BronzeToSilver()
@@ -69,32 +66,26 @@ if __name__ == "__main__":
     y2021_clean = cleaner.clean_y2021(y2021_df)
     print("✅ 2021-only cleaned.\n")
 
-    # Clean geolocation data
-    geo_clean = cleaner.clean_geolocation(geo_df)
-    print("✅ Geolocation cleaned.\n")
-
     # Save each cleaned DataFrame to silver
     cleaner.save_multi(multi_clean)       # data/silver/world_happiness_multi_silver.csv
     cleaner.save_y2021(y2021_clean)       # data/silver/world_happiness_2021_silver.csv
-    cleaner.save_geolocation(geo_clean)   # data/silver/geolocation_silver.csv
-    print("✅ All cleaned data saved to 🥈 folder.\n")
+    print("✅ Cleaned data saved to 🥈 folder.\n")
 
     # ------------------------------------------------------------------
     # Stage 3: Load silver data (same style as bronze loaders)
     # ------------------------------------------------------------------
 
-    multi_clean_s, y2021_clean_s, geo_clean_s = load_all_silver_data(verbose=True)
+    multi_clean_s, y2021_clean_s = load_all_silver_data(verbose=True)
     print("✅ Silver loaded 🥈.\n")
 
     # ------------------------------------------------------------------
-    # Stage 4: Silver → Gold (append 2021 into multi-year, merge geo, save)
+    # Stage 4: Silver → Gold (append 2021 into multi-year, save)
     # ------------------------------------------------------------------
 
     s2g = SilverToGold()
     gold_df = s2g.run(
         multi_df=multi_clean_s,
         y2021_df=y2021_clean_s,
-        geo_df=geo_clean_s,
         restrict_multi_to_2021_countries=True,
         verbose=True,
         save_output=True,

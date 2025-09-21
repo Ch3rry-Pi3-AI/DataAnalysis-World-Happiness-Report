@@ -111,7 +111,6 @@ class BronzeToSilver:
 
     Provides methods to:
     - standardise and clean the multi-year and 2021 datasets,
-    - clean the geolocation dataset,
     - save each cleaned DataFrame into the 🥈 silver layer.
     """
 
@@ -142,19 +141,23 @@ class BronzeToSilver:
             Standardised DataFrame.
         """
 
+        # Convert all column names to snake_case for consistency across datasets.
         df = _snake_case_columns(df)
 
+        # If the dataset used 'country' rather than 'country_name', standardise the key.
         if "country_name" not in df.columns and "country" in df.columns:
-            df = df.rename(columns={"country": "country_name"})
+            df = df.rename(columns={"country": "country_name"})  # unify merge key
 
+        # If a year column is missing, add one using the provided default (e.g., 2021).
         if default_year is not None and "year" not in df.columns:
             df["year"] = default_year
 
+        # Clean up the country field: ensure string type and remove leading/trailing spaces.
         if "country_name" in df.columns:
             df["country_name"] = df["country_name"].astype(str).str.strip()
 
         return df
-    
+
     # ------------------------------------------------------------------
     # Step 2: Filtering
     # ------------------------------------------------------------------
@@ -184,9 +187,7 @@ class BronzeToSilver:
     @staticmethod
     def _impute_numeric(df: pd.DataFrame) -> pd.DataFrame:
         """
-        Impute missing numeric values:
-        1) fill within-country mean,
-        2) fill remaining with global mean.
+        Impute missing numeric values using within-country mean
 
         Parameters
         ----------
@@ -197,22 +198,20 @@ class BronzeToSilver:
         pandas.DataFrame
         """
 
+        # Identify which columns are numeric so we can impute their missing values.
         num_cols = _numeric_columns(df)
         if not num_cols:
-            return df
+            return df  # nothing to impute
 
+        # Within-country mean imputation (preserves country-level signal).
         if "country_name" in df.columns:
             df[num_cols] = (
                 df.groupby("country_name")[num_cols]
-                .transform(lambda g: g.fillna(g.mean()))
+                  .transform(lambda g: g.fillna(g.mean()))
             )
 
-        for col in num_cols:
-            if df[col].isna().any():
-                df[col] = df[col].fillna(df[col].mean())
-
         return df
-    
+
     # ------------------------------------------------------------------
     # Step 4: Region Normalisation
     # ------------------------------------------------------------------
@@ -239,57 +238,11 @@ class BronzeToSilver:
             }
 
             df["regional_indicator"] = df["regional_indicator"].replace(replacements)
-        
-        return df
-    
-    # ------------------------------------------------------------------
-    # Step 5: Geolocation Standardisation
-    # ------------------------------------------------------------------
 
-    @staticmethod
-    def _standardise_geo_columns(df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Standardise geolocation dataset:
-        - snake_case columns,
-        - strip whitespace from `country_name`.
-
-        Parameters
-        ----------
-        df : pandas.DataFrame
-
-        Returns
-        -------
-        pandas.DataFrame
-        """
-
-        df = _snake_case_columns(df)
-        if "country_name" in df.columns:
-            df["country_name"] = df["country_name"].astype(str).str.strip()
-        return df
-
-    @staticmethod
-    def _drop_missing_coords(df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Drop rows missing latitude/longitude.
-
-        Parameters
-        ----------
-        df : pandas.DataFrame
-
-        Returns
-        -------
-        pandas.DataFrame
-        """
-
-        before = len(df)
-        df = df.dropna(subset=["latitude", "longitude"])
-        after = len(df)
-        if after != before:
-            print(f"Dropped {before - after} rows without lat/lon\n")
         return df
 
     # ------------------------------------------------------------------
-    # Step 6: Persistence
+    # Step 5: Persistence
     # ------------------------------------------------------------------
 
     @staticmethod
@@ -314,14 +267,20 @@ class BronzeToSilver:
             Path to the saved file.
         """
 
+        # Ensure the silver output directory exists (create parents if needed).
         silver_path = Path(silver_folder)
-        _ensure_dir(silver_path)
+        _ensure_dir(silver_path)  # safe no-op if already present
+
+        # Compose the full output path inside the 🥈 silver layer.
         out = silver_path / filename
+
+        # Write the DataFrame to CSV (no row index in the file).
         df.to_csv(out, index=False)
+
         return out
 
     # ------------------------------------------------------------------
-    # Step 7: Public Cleaners
+    # Step 6: Public Cleaners
     # ------------------------------------------------------------------
 
     def clean_multi_year(self, df_multi: pd.DataFrame) -> pd.DataFrame:
@@ -370,29 +329,8 @@ class BronzeToSilver:
         print("✅ 2021-only cleaned\n")
         return df
 
-    def clean_geolocation(self, df_geo: pd.DataFrame) -> pd.DataFrame:
-        """
-        Clean the geolocation dataset.
-
-        Steps
-        -----
-        1. Snake-case and standardise `country_name`.
-        2. Drop rows with missing `country_name`.
-        3. Drop rows missing lat/lon.
-
-        Returns
-        -------
-        pandas.DataFrame
-        """
-
-        df = self._standardise_geo_columns(df_geo)
-        df = self._basic_filter(df)
-        df = self._drop_missing_coords(df)
-        print("✅ Geolocation cleaned\n")
-        return df
-
     # ------------------------------------------------------------------
-    # Step 8: Saving Methods
+    # Step 7: Saving Methods
     # ------------------------------------------------------------------
 
     def save_multi(self, df: pd.DataFrame, silver_folder: str = "data/silver") -> Path:
@@ -402,12 +340,6 @@ class BronzeToSilver:
     def save_y2021(self, df: pd.DataFrame, silver_folder: str = "data/silver") -> Path:
         """Save cleaned 2021-only dataset to silver folder."""
         return self._save_silver(df, "world_happiness_2021_silver.csv", silver_folder)
-
-    def save_geolocation(
-        self, df: pd.DataFrame, silver_folder: str = "data/silver"
-    ) -> Path:
-        """Save cleaned geolocation dataset to silver folder."""
-        return self._save_silver(df, "geolocation_silver.csv", silver_folder)
 
 
 # ----------------------------------------------------------------------
@@ -422,7 +354,6 @@ if __name__ == "__main__":
     paths = {
         "multi": Path("data/bronze/world-happiness-report.csv"),
         "y2021": Path("data/bronze/world-happiness-report-2021.csv"),
-        "geo": Path("data/bronze/geolocation.csv"),
     }
 
     # Existence check
@@ -433,14 +364,12 @@ if __name__ == "__main__":
     # Load -> clean
     multi_clean = cleaner.clean_multi_year(pd.read_csv(paths["multi"]))
     y2021_clean = cleaner.clean_y2021(pd.read_csv(paths["y2021"]))
-    geo_clean = cleaner.clean_geolocation(pd.read_csv(paths["geo"]))
 
     # Save -> silver
     cleaner.save_multi(multi_clean)
     cleaner.save_y2021(y2021_clean)
-    cleaner.save_geolocation(geo_clean)
 
     # Summary
     print("✅ Saved cleaned CSVs to 🥈 folder:")
-    for name, df in [("multi", multi_clean), ("y2021", y2021_clean), ("geo", geo_clean)]:
+    for name, df in [("multi", multi_clean), ("y2021", y2021_clean)]:
         print(f"{name}: {df.shape[0]} rows x {df.shape[1]} cols")
