@@ -2,7 +2,7 @@
 Simple entry point for downloading the World Happiness Report datasets.
 
 This script:
-1) Downloads bronze datasets (World Happiness + Geolocation).
+1) Downloads bronze datasets (World Happiness Report 2021 and Multi-year).
 
 Notes
 -----
@@ -15,7 +15,6 @@ Notes
 # ----------------------------------------------------------------------
 from src import (
     get_world_happiness_data,   # src/get_data/import_happiness_data.py
-    fetch_geolocation_data,     # src/get_data/import_geolocation_data.py
 )
 
 
@@ -28,5 +27,4 @@ if __name__ == "__main__":
     # Stage 1: Download bronze datasets
     # ------------------------------------------------------------------
     get_world_happiness_data(verbose=True)
-    fetch_geolocation_data(verbose=True)
     print("✅ Bronze downloaded 🥉.\n")
