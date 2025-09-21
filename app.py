@@ -1,5 +1,5 @@
 """
-Simple entry point for the World Happiness pipeline.
+Simple entry point for the World Happiness pipeline and dashboard.
 
 This script:
 1) Downloads bronze datasets (World Happiness).
@@ -8,13 +8,16 @@ This script:
 4) Loads silver data (mirrors bronze loader style).
 5) Runs Silver → Gold to append 2021 into the multi-year dataset and save.
 6) Loads the final Gold dataset from `data/gold/`.
+7) Launches the Dash dashboard with 5 interactive pages.
 
 Notes
 -----
-- Run this script directly (`python app.py`) to execute the end-to-end pipeline.
+- Run this script directly (`python app.py`) to execute the end-to-end pipeline
+  and start the dashboard server.
 - Bronze outputs are saved in `data/bronze/`.
 - Silver cleaned outputs are saved in `data/silver/`.
 - Gold outputs are saved in `data/gold/`.
+- The dashboard is served locally at http://127.0.0.1:8050/.
 """
 
 # ----------------------------------------------------------------------
@@ -30,6 +33,10 @@ from src import (
     SilverToGold,               # src/feature_engineering/engineer_silver_data.py
     load_gold_happiness_data,   # src/eda/load_gold_data.py
 )
+
+# Dashboard imports
+from src.dash_app.data_access import set_gold_df, get_gold_df
+from src.dash_app.create_app import dashboard
 
 
 # ----------------------------------------------------------------------
@@ -49,7 +56,6 @@ if __name__ == "__main__":
     # Stage 1b: Load bronze datasets
     # ------------------------------------------------------------------
 
-    # Mirrors the style used in load_bronze_data.py (friendly prints)
     multi_df, y2021_df = load_all_bronze_data(verbose=True)
     print("✅ Bronze loaded 🥉.\n")
 
@@ -58,16 +64,9 @@ if __name__ == "__main__":
     # ------------------------------------------------------------------
 
     cleaner = BronzeToSilver()
-
-    # Clean multi-year happiness data
     multi_clean = cleaner.clean_multi_year(multi_df)
-    print("✅ Multi-year cleaned.\n")
-
-    # Clean 2021-only happiness data
     y2021_clean = cleaner.clean_y2021(y2021_df)
-    print("✅ 2021-only cleaned.\n")
 
-    # Save each cleaned DataFrame to silver
     cleaner.save_multi(multi_clean)       # data/silver/world_happiness_multi_silver.csv
     cleaner.save_y2021(y2021_clean)       # data/silver/world_happiness_2021_silver.csv
     print("✅ Cleaned data saved to 🥈 folder.\n")
@@ -99,3 +98,14 @@ if __name__ == "__main__":
 
     gold_df = load_gold_happiness_data(verbose=True)
     print("✅ Gold loaded 🥇.\n")
+
+    # ------------------------------------------------------------------
+    # Stage 6: Launch dashboard (Dash app with 5 pages)
+    # ------------------------------------------------------------------
+
+    set_gold_df(gold_df)                # Inject dataset into central provider
+    print(get_gold_df().head())         # Sanity check preview
+
+    app = dashboard(enable_pages=True)
+    print("🚀 Launching Dash dashboard at http://127.0.0.1:8050 ...")
+    app.run(debug=True, use_reloader=False)
