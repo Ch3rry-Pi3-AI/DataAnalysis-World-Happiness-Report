@@ -1,104 +1,103 @@
-# Exploratory Data Analysis – Gold
+# Dashboard App – Gold → Visualisation
 
-This stage focuses on **loading the engineered gold dataset** and **exploring it with a small, teaching‑friendly EDA toolkit**.
+This branch focuses on **building an interactive dashboard** with Dash to explore the engineered gold dataset.
+It introduces a modular app structure, a central data accessor, and five interactive pages.
 
 What this stage does:
 
-* Adds a lightweight `src/eda/` package for gold‑data exploration.
-* Provides `load_gold_data.py` to read `data/gold/world_happiness.csv` as a `pandas.DataFrame`.
-* Provides `explore_gold_data.py` with an `EDAExplorer` class (Numpy-style docstrings, clear comments) to:
+* Adds a new `src/dash_app/` package for Dash integration.
+* Provides `create_app.py` to construct the Dash app with navigation, layout, and page routing.
+* Provides `data_access.py` to inject and retrieve the gold dataset across all pages.
+* Introduces a new `src/dash_app/app_pages/` folder containing **five dashboard pages**:
 
-  * preview rows and dataset info,
-  * summarise numeric & categorical features,
-  * inspect missingness (table and optional bar chart),
-  * plot histograms and boxplots of numeric columns,
-  * compute/plot correlation heatmaps (with optional `top_k` pruning),
-  * draw a simple longitude/latitude scatter (optional `hue`).
+  * `home.py` – overview, dataset summary, and top/bottom rankings.
+  * `dataset.py` – tabular view, filters, and summary tables.
+  * `relationship.py` – scatterplots and correlation heatmaps.
+  * `geo.py` – choropleths, regional radials, and Top-10 bar charts.
+  * `trends.py` – time-series by region and Top-10 changes between years.
 
-* Introduces a **notebook entrypoint** (`notebooks/eda_notebook.ipynb`) that calls these helpers and writes plots to `artifacts/` as PNGs.
+The dashboard is launched via `python app.py`.
 
 ## Project Structure
 
-New modules live in `src/eda/`. A new **notebooks** folder (entrypoint) and an artifacts folder (auto-created when plotting) are included:
+The project now contains **all prior stages** (bronze, silver, gold) plus the new **dashboard stage**:
 
 ```
 project-root/
-├── app.py
+├── app.py                                   # Entrypoint: launches dashboard
 ├── src/
 │   ├── __init__.py
 │   ├── get_data/
 │   │   ├── __init__.py
-│   │   ├── import_happiness_data.py
-│   │   └── import_geolocation_data.py
+│   │   └── import_happiness_data.py
 │   ├── preprocess_data/
 │   │   ├── __init__.py
 │   │   ├── load_bronze_data.py
 │   │   └── clean_bronze_data.py
-│   ├── feature_engineering/                  
-│   │   ├── __init__.py                      
-│   │   ├── load_silver_data.py              
-│   │   └── engineer_silver_data.py          
-│   ├── eda/                                 🆕 (NEW)
-│   │   ├── __init__.py                      🆕 
-│   │   ├── load_gold_data.py                🆕
-│   │   └── explore_gold_data.py             🆕
-├── eda/                                     🆕
-│   └── eda_notebook.ipynb                   🆕
+│   ├── feature_engineering/
+│   │   ├── __init__.py
+│   │   ├── load_silver_data.py
+│   │   └── engineer_silver_data.py
+│   ├── eda/
+│   │   ├── __init__.py
+│   │   ├── load_gold_data.py
+│   │   └── explore_gold_data.py
+│   └── dash_app/                            🆕 (NEW)
+│       ├── __init__.py                      🆕
+│       ├── create_app.py                    🆕
+│       ├── data_access.py                   🆕
+│       └── app_pages/                       🆕 (NEW)
+│           ├── home.py                      🆕
+│           ├── dataset.py                   🆕
+│           ├── relationship.py              🆕
+│           ├── geo.py                       🆕
+│           └── trends.py                    🆕
+├── notebooks/
+│   └── eda_notebook.ipynb
 ├── data/
-│    ├── bronze/
-│    ├── silver/
-│    └── gold/                               
-│        └── world_happiness_gold.csv        
-└── artifacts/                               🆕 (NEW)
-    ├── missing.png                          🆕 
-    ├── histograms.png                       🆕
-    ├── boxplots.png                         🆕
-    ├── correlations_pearson.png             🆕
-    └── geo_scatter.png                      🆕
+│   ├── bronze/
+│   ├── silver/
+│   └── gold/
+│       └── world_happiness_gold.csv
+└── artifacts/
+    ├── missing.png
+    ├── histograms.png
+    ├── boxplots.png
+    └── correlations_pearson.png
 ```
 
-* `load_gold_data.py` -> Loads `data/gold/world_happiness_gold.csv` into a DataFrame. 
-* `explore_gold_data.py` -> `EDAExplorer` with preview/describe/missingness/plots; configurable via `EDAConfig` (style, DPI, palette, optional `sns.set_theme`).
-* `eda_notebook.ipynb` -> Natural entrypoint: demonstrates the helpers and writes PNGs to `artifacts/`.
+* `create_app.py` → Configures the Dash app, navbar, and page routing.
+* `data_access.py` → Provides central getter/setter for the gold DataFrame.
+* `home.py` → Overview page with dataset snapshot and quick rankings.
+* `dataset.py` → Dataset explorer with filters, tables, and regional summaries.
+* `relationship.py` → Relationship explorer with scatterplots and correlation heatmaps.
+* `geo.py` → Geographic views: choropleth, regional radial, and Top-10 chart.
+* `trends.py` → Time-series explorer: Top-10 changes and region-mean line charts.
 
-## Notebook
-The notebook `eda_notebook.ipynb` is contained in the `notebooks/` folder. The main code comprises:
+## How to Run
 
-```python
-from pathlib import Path
-from src.eda.load_gold_data import load_gold_happiness_data
-from src.eda.explore_gold_data import EDAExplorer, EDAConfig
+From the project root:
 
-# Load gold dataset
-gold_df = load_gold_happiness_data()
-
-# Configure EDA (save figures to artifacts/)
-cfg = EDAConfig(save_dir=Path("artifacts"), use_theme=True, fig_dpi=110)
-eda = EDAExplorer(gold_df, config=cfg, lat_col="latitude", lon_col="longitude")
-
-# Quick looks
-eda.preview(n=5)
-eda.info()
-eda.describe_numeric()
-eda.describe_categorical(console=True)
-
-# Data quality and distributions
-eda.missing(plot=True)
-eda.histograms(bins=30)
-eda.boxplots(show_outliers=True)
-
-# Relationships and geography
-eda.correlations(method="pearson", top_k=20)
-eda.geo_scatter(hue="ladder_score")
+```bash
+python app.py
 ```
-> **Note**: The notebook contains additional code to ensure that imports resolve to the project root.
+
+This will:
+
+* Load the gold dataset,
+* Inject it into the `data_access` provider,
+* Construct the Dash app with pages enabled,
+* Launch a local web server (`http://127.0.0.1:8050`).
 
 ## Output
-* **PNG figures** in `artifacts/` (created automatically when plotting):
-  * `missing.png`, `histograms.png`, `blowplots.png`, `correlations_<method>.png`, `geo_scatter.png`.
-* **Console summaries** in the notebook (shape, dtypes, memory usage, numeric/categorical summaries).
+
+* **Interactive dashboard** served locally with 5 navigation tabs: Home, Dataset, Relationship, Geography, and Trends.
+* Console log prints the gold dataset preview (`head()`) when starting.
+* Debug mode is enabled by default (`debug=True`) for development.
 
 ## Notes
-* `EDAExplorer` works on a defensive copy of the DataFrame (EDA is non-destructive).
-* Styling uses seaborn; you can opt into `sns.set_theme()` via `EDAConfig(use_theme=True)`.
-* Methods that *display* content typically print/plot rather than return tables; this keeps the notebook flow simple and more aesthetic.
+
+* The app uses **Dash Pages** for modular navigation.
+* Dataset access is centralised through `data_access.py` to keep pages lightweight and consistent.
+* Stylesheets use Bootstrap for clean, responsive design.
+* This stage completes the pipeline: from raw bronze data → engineered gold data → **interactive visualisation**.
