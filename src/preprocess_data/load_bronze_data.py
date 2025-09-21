@@ -106,60 +106,12 @@ def load_bronze_happiness_data(
     return multi_df, y2021_df
 
 
-def load_bronze_geolocation_data(
-    verbose: bool = False,
-    bronze_folder: str = "data/bronze",
-) -> pd.DataFrame:
-    """
-    Load the geolocation CSV from the bronze layer.
-
-    Parameters
-    ----------
-    verbose : bool, optional
-        If True, print a short summary for the loaded file (default: False).
-    bronze_folder : str, optional
-        Folder path to the bronze layer (default: 'data/bronze').
-
-    Returns
-    -------
-    pandas.DataFrame
-        Geolocation table with at least: country (ISO-ish code), country_name,
-        latitude, longitude.
-
-    Notes
-    -----
-    - This function only *loads* the table. Any renaming/cleaning happens in
-      the preprocessing/cleaning stage.
-    """
-
-    # ----------------------------------------------------------------------
-    # Step 1: Build file path
-    # ----------------------------------------------------------------------
-    bronze_path = Path(bronze_folder)
-    geo_file = bronze_path / "geolocation.csv"
-
-    # ----------------------------------------------------------------------
-    # Step 2: Read with friendly error handling
-    # ----------------------------------------------------------------------
-    geo_df = _read_csv(geo_file)
-    if verbose:
-        print(
-            f"📄 Loaded geolocation [{geo_file.name}]: "
-            f"{geo_df.shape[0]} rows x {geo_df.shape[1]} cols"
-        )
-
-    # ----------------------------------------------------------------------
-    # Step 3: Return DataFrame for downstream processing
-    # ----------------------------------------------------------------------
-    return geo_df
-
-
 def load_all_bronze_data(
     bronze_folder: str = "data/bronze",
     verbose: bool = False,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Convenience loader for all bronze datasets.
+    Convenience loader for all bronze datasets (happiness only).
 
     Parameters
     ----------
@@ -170,13 +122,12 @@ def load_all_bronze_data(
 
     Returns
     -------
-    (multi_df, y2021_df, geo_df) : tuple[pandas.DataFrame, pandas.DataFrame, pandas.DataFrame]
-        The three bronze DataFrames in a single call.
+    (multi_df, y2021_df) : tuple[pandas.DataFrame, pandas.DataFrame]
+        The two bronze DataFrames in a single call.
 
     Notes
     -----
-    - Equivalent to calling `load_bronze_happiness_data(...)` and
-      `load_bronze_geolocation_data(...)` separately.
+    - Equivalent to calling `load_bronze_happiness_data(...)`.
     """
 
     # ----------------------------------------------------------------------
@@ -186,26 +137,18 @@ def load_all_bronze_data(
         verbose=verbose, bronze_folder=bronze_folder
     )
 
-    # ----------------------------------------------------------------------
-    # Step 2: Load the geolocation table
-    # ----------------------------------------------------------------------
-    geo_df = load_bronze_geolocation_data(
-        verbose=verbose, bronze_folder=bronze_folder
-    )
-
     if verbose:
-        print("\n✅ Success: Loaded all 🥉 data\n")
+        print("\n✅ Success: Loaded all 🥉 happiness data\n")
 
     # ----------------------------------------------------------------------
-    # Step 3: Return all three
+    # Step 2: Return both
     # ----------------------------------------------------------------------
-    return multi_df, y2021_df, geo_df
+    return multi_df, y2021_df
 
 
 # Allow standalone execution (useful for quick, manual checks)
 if __name__ == "__main__":
     # Minimal smoke run
     _ = load_bronze_happiness_data(verbose=True)
-    _ = load_bronze_geolocation_data(verbose=True)
     _ = load_all_bronze_data(verbose=True)
     print("✅ Bronze loaders OK")

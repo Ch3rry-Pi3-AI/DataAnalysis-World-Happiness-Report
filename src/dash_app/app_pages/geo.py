@@ -91,9 +91,15 @@ def _year_options(df: pd.DataFrame) -> list[dict]:
 
     if "year" not in df.columns:
         return []
-    years = sorted(pd.Series(df["year"]).dropna().unique().tolist())
+    years = sorted(pd.Series(df["year"]).dropna().unique().tolist(), reverse=True)
     return [{"label": str(int(y)), "value": int(y)} for y in years]
 
+def _default_year(df: pd.DataFrame) -> int | None:
+    """Prefer 2021 if available; otherwise use the most recent year."""
+    if "year" not in df.columns:
+        return None
+    years = pd.Series(df["year"]).dropna().astype(int)
+    return 2021 if (years == 2021).any() else int(years.max())
 
 def _region_options(df: pd.DataFrame) -> list[dict]:
     """
@@ -157,13 +163,9 @@ _BASE = _df()
 _NUMS = _numeric_cols(_BASE)
 
 # Defaults requested: Year=2021, Metric="ladder_score"
-_DEFAULT_YEAR = (
-    2021
-    if "year" in _BASE.columns and (pd.Series(_BASE["year"]).dropna() == 2021).any()
-    else (int(pd.Series(_BASE["year"]).dropna().max()) if "year" in _BASE.columns else None)
-)
-_DEFAULT_METRIC = "ladder_score" if "ladder_score" in _NUMS else (_NUMS[0] if _NUMS else None)
+_DEFAULT_YEAR = _default_year(_BASE) 
 
+_DEFAULT_METRIC = "ladder_score" if "ladder_score" in _NUMS else (_NUMS[0] if _NUMS else None)
 
 # ----------------------------------------------------------------------
 # Layout (modular: controls_col, charts_col, layout)
@@ -219,25 +221,20 @@ charts_col = html.Div(
     children=[
     
         # Top row: full-width choropleth
-        dcc.Graph(id="geo-choropleth", style={"height": "460px"}, className="mb-3"),
+        dcc.Graph(id="geo-choropleth", style={"height": "400px"}, className="mb-3"),
 
         # Second row: radial (by region) + top 10 bar chart
         html.Div(
             className="row g-3",
             children=[
                 html.Div(className="col-12 col-xl-6", children=[
-                    html.H6("Regional Radial", className="fw-bold mb-2"),
-                    dcc.Graph(id="geo-radial", style={"height": "360px"}),
+                    dcc.Graph(id="geo-radial", style={"height": "300px"}),
                 ]),
                 html.Div(className="col-12 col-xl-6", children=[
-                    html.H6("Top 10 Countries", className="fw-bold mb-2"),
-                    dcc.Graph(id="geo-top10", style={"height": "360px"}),
+                    dcc.Graph(id="geo-top10", style={"height": "300px"}),
                 ]),
             ],
         ),
-
-        # Row count (footer)
-        html.Div(id="geo-row-count", className="text-end text-muted mt-2"),
     ],
 )
 
@@ -281,7 +278,6 @@ layout = html.Div(
     Output("geo-choropleth", "figure"),
     Output("geo-radial", "figure"),
     Output("geo-top10", "figure"),
-    Output("geo-row-count", "children"),
     Input("geo-year-dd", "value"),
     Input("geo-region-dd", "value"),
     Input("geo-metric-dd", "value"),
@@ -299,7 +295,6 @@ def _update_geo(year_value, region_values, metric):
     """
 
     df = _apply_filters(_df(), year_value, region_values)
-    count_txt = f"{len(df):,} matching rows"
 
     # Choropleth 
     if metric and "country_name" in df.columns and metric in df.columns:
@@ -317,7 +312,7 @@ def _update_geo(year_value, region_values, metric):
                 hover_name="country_name",
                 hover_data=["regional_indicator", metric] if "regional_indicator" in map_df.columns else [metric],
                 color_continuous_scale="Viridis",
-                title=f"{_labels(metric)} — Choropleth" + (f" · {int(year_value)}" if year_value else ""),
+                title=f"{_labels(metric)} - Choropleth" + (f" · {int(year_value)}" if year_value else ""),
             )
             choropleth.update_layout(
                 margin={"t": 70, "l": 10, "r": 10, "b": 10},
@@ -356,7 +351,7 @@ def _update_geo(year_value, region_values, metric):
         top_src = top_src.dropna(subset=[metric]).sort_values(metric, ascending=False).head(10)
 
         if top_src.empty:
-            top10 = px.bar(title="Top 10 Countries — No data")
+            top10 = px.bar(title="Top 10 Countries - No data")
         
         else:
             top10 = px.bar(
@@ -367,10 +362,15 @@ def _update_geo(year_value, region_values, metric):
                 orientation="h",
                 hover_name="country_name",
                 title=f"Top 10 Countries by {_labels(metric)}" + (f" · {int(year_value)}" if year_value else ""),
+                labels={
+                    metric: _labels(metric),          
+                    "country_name": "Country",        
+                    "regional_indicator": "Region",   
+                },
             )
             top10.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, legend=dict(title="Region"))
     
     else:
         top10 = px.bar(title="Select a metric")
 
-    return choropleth, radial, top10, count_txt
+    return choropleth, radial, top10

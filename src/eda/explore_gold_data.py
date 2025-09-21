@@ -3,7 +3,7 @@ Exploratory Data Analysis helpers for the Gold World Happiness dataset.
 
 This module provides a lightweight, teaching-friendly EDA utility with:
 - concise preview/summary helpers,
-- common plots (histograms, boxplots, correlations, simple geo scatter),
+- common plots (histograms, boxplots, correlations),
 - and a small configuration object to control seaborn/matplotlib styling.
 
 The emphasis is readability and intent — comments explain *why* each step exists.
@@ -67,28 +67,19 @@ class EDAExplorer:
         The gold dataset to explore (copied internally)
     config : EDAConfig or None, optional
         Configuration for styling and saving (default: 'EDAConfig()')
-    lat_col : str, optional
-        Latitude column name for simple geo plots (default: "latitude")
-    lon_col : str, optional
-        Longitude column name for simple geo plots (default: "longitude")
     """
 
     def __init__(
         self,
         df: pd.DataFrame,
         config: Optional[EDAConfig] = None,
-        lat_col: str = "latitude",
-        lon_col: str = "longitude",
     ) -> None:
         
         # Keep defensive copy so EDA never mutates caller's DataFrame. 
         self.df = df.copy()
 
-        # Initialise configuration and geolocation columns
+        # Initialise configuration
         self.config = config or EDAConfig()
-        self.lat_col = lat_col
-        self.lon_col = lon_col
-
 
         # Apply seaborn styling/context (teaching-friendly, consistent visuals).
         if self.config.use_theme:
@@ -419,61 +410,6 @@ class EDAExplorer:
         ax.set_title(f"Correlation heatmap ({method})")
         plt.tight_layout()
         self._finalise(fig, f"correlations_{method}.png")
-        
-    def geo_scatter(
-        self,
-        hue: Optional[str] = None,
-        alpha: float = 0.8,
-        s: int = 40,
-    ) -> None:
-        """
-        Very simple lat/long scatter (no basemap), to eyeball coverage.
-        
-        Parameters
-        ----------
-        hue : str or None, optional
-            Optional column name to colour points by.
-        alpha : float, optional
-            Alter transparency (default: 0.8)
-        s : int, optional
-            Marker size (default: 40)
-        """
-
-        # Ensure the expected geolocation columns exist.
-        if self.lat_col not in self.df.columns or self.lon_col not in self.df.columns:
-            print(f"Latitude/longitude not found (expected '{self.lat_col}', '{self.lon_col}').")
-            return
-
-        # Build a minimal DataFrame for plotting
-        cols = [self.lat_col, self.lon_col]
-        if hue and hue in self.df.columns:
-            cols.append(hue)
-        plot_df = self.df[cols].dropna()
-
-        # If no rows have valid coordinates
-        if plot_df.empty:
-            print("No rows with latitude/longitude to plot.")
-            return
-
-        # Create the scatterplot figure
-        fig, ax = plt.subplots(figsize=(8, 4.5), dpi=self.config.fig_dpi)
-        
-        # Use seaborn when hue column is provided.
-        if hue and hue in plot_df.columns:
-            sns.scatterplot(
-                data=plot_df,
-                x=self.lon_col, y=self.lat_col,
-                hue=hue, s=s, edgecolor="none", alpha=alpha, ax=ax,
-            )
-            ax.legend(title=hue, bbox_to_anchor=(1.02, 1), loc="upper left")
-        else:
-            ax.scatter(plot_df[self.lon_col], plot_df[self.lat_col], s=s, alpha=alpha)
-
-        ax.set_title("Geographic scatter (lon vs lat)")
-        ax.set_xlabel(self.lon_col)
-        ax.set_ylabel(self.lat_col)
-        plt.tight_layout()
-        self._finalise(fig, "geo_scatter.png")
     
     # ------------------------------------------------------------------
     # Step 3: Helpers

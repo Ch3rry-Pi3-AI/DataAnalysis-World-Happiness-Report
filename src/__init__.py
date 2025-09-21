@@ -1,7 +1,7 @@
 from .get_data.import_happiness_data import get_world_happiness_data
-from .get_data.import_geolocation_data import fetch_geolocation_data
+# from .get_data.import_geolocation_data import fetch_geolocation_data
 from .preprocess_data.load_bronze_data import load_bronze_happiness_data
-from .preprocess_data.load_bronze_data import load_bronze_geolocation_data
+# from .preprocess_data.load_bronze_data import load_bronze_geolocation_data
 from .preprocess_data.load_bronze_data import load_all_bronze_data
 from .preprocess_data.clean_bronze_data import BronzeToSilver
 from .feature_engineering.load_silver_data import load_all_silver_data
