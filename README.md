@@ -1,13 +1,15 @@
 # Data Preprocessing – Bronze -> Silver
 
 This branch of the project is focused on **loading the bronze datasets** and **cleaning them** into the silver layer.
-The following three datasets are cleaned individually in this stage, preparing them for merging in the upcoming feature engineering stage:
+The following two datasets are cleaned individually in this stage, preparing them for merging in the upcoming feature engineering stage:
 
 * World Happiness Report (multi-year)
 * World Happiness Report 2021
-* Geolocation Data (country codes, names, latitude, longitude)
 
-The purpose of this stage is to ensure consistent column naming, add missing metadata (such as `year`), perform basic numeric imputations, and remove incomplete geolocation rows. The cleaned outputs are stored in the **silver** container for downstream use.
+The purpose of this stage is to ensure consistent column naming, add missing metadata (such as `year`), and perform basic numeric imputations.
+The cleaned outputs are stored in the **silver** container for downstream use.
+
+
 
 ## Project Structure
 
@@ -20,8 +22,7 @@ project-root/
 │   ├── __init__.py
 │   ├── get_data/
 │   │   ├── __init__.py
-│   │   ├── import_happiness_data.py
-│   │   └── import_geolocation_data.py
+│   │   └── import_happiness_data.py
 │   ├── preprocess_data/                    🆕 (NEW)
 │   │   ├── __init__.py                     🆕
 │   │   ├── load_bronze_data.py             🆕
@@ -31,9 +32,11 @@ project-root/
     └── silver/    # cleaned outputs        🆕
 ```
 
-* `load_bronze_data.py` -> Loads all bronze CSVs (multi-year, 2021, geolocation) into pandas DataFrames.
-* `clean_bronze_data.py` -> Cleans each DataFrame (standardises columns, imputes missing values, validates coordinates, etc.) and saves them to the silver folder.
-* `app.py` -> Updated to run the full pipeline: download bronze -> load bronze -> clean -> save silver.
+* `load_bronze_data.py` → Loads all bronze CSVs (multi-year, 2021) into pandas DataFrames.
+* `clean_bronze_data.py` → Cleans each DataFrame (standardises columns, imputes missing values, etc.) and saves them to the silver folder.
+* `app.py` → Updated to run the full pipeline: download bronze → load bronze → clean → save silver.
+
+
 
 ## How to Run
 
@@ -50,7 +53,7 @@ python app.py
 This will:
 
 * Download the bronze data if missing,
-* Load all three bronze DataFrames,
+* Load both bronze DataFrames,
 * Clean them individually,
 * Save the cleaned outputs into `data/silver/`.
 
@@ -76,7 +79,8 @@ From the project root:
 python -m src.preprocess_data.clean_bronze_data
 ```
 
-This will clean one or more of the bronze DataFrames and display before/after column names. When used through `app.py`, it will also save the cleaned versions into the silver folder.
+This will clean one or more of the bronze DataFrames and display before/after column names.
+When used through `app.py`, it will also save the cleaned versions into the silver folder.
 
 
 
@@ -86,9 +90,8 @@ This will clean one or more of the bronze DataFrames and display before/after co
 
   * `world_happiness_multi_silver.csv`
   * `world_happiness_2021_silver.csv`
-  * `geolocation_silver.csv`
 
-* Logging confirms column standardisation, imputation, and geolocation validation.
+* Logging confirms column standardisation and imputation.
 
 
 
@@ -97,4 +100,3 @@ This will clean one or more of the bronze DataFrames and display before/after co
 * These scripts are designed for the **silver stage** of the medallion architecture.
 * Each dataset is cleaned **individually** in this stage. They will be merged together in the **feature engineering stage (gold)**.
 * All modules follow the same style as earlier stages with docstrings, comments, and logging for clarity.
-
