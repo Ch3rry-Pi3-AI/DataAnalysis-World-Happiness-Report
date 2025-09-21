@@ -148,7 +148,7 @@ def _region_color_map(df: pd.DataFrame) -> dict[str, str]:
         return {}
 
     regions = sorted(pd.Series(df[reg_col]).dropna().unique().tolist())
-    palette = px.colors.qualitative.Set2  # gentle, distinct
+    palette = px.colors.qualitative.Set2 
     # Cycle if more regions than colours available
     cmap = {r: palette[i % len(palette)] for i, r in enumerate(regions)}
     return cmap
@@ -419,10 +419,10 @@ charts_col = html.Div(
     className="col-12 col-lg-9",
     children=[
         # Full-width Top Change barplot (shows legend)
-        dcc.Graph(id="ts-top-change", style={"height": "380px"}, className="mb-3"),
+        dcc.Graph(id="ts-top-change", style={"height": "350px"}, className="mb-3"),
 
         # Full-width time series (legend = Region, colour map aligned)
-        dcc.Graph(id="ts-lines", style={"height": "430px"}),
+        dcc.Graph(id="ts-lines", style={"height": "350px"}),
     ],
 )
 
