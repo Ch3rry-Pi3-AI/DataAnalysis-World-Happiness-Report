@@ -161,7 +161,7 @@ def _region_color_map(df: pd.DataFrame) -> dict[str, str]:
 
     Notes
     -----
-    - Uses a qualitative palette (Plotly Set2) for distinct, readable hues.
+    - Uses a qualitative palette (Plotly Safe) for distinct, readable hues.
     - Cycles the palette if there are more regions than colours.
     """
 
