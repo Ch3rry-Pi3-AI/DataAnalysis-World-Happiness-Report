@@ -1,0 +1,9 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: world-happiness-dashboard
+    ports:
+      - "8050:8050"       
+    restart: unless-stopped
