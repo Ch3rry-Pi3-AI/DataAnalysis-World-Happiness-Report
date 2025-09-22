@@ -155,6 +155,25 @@ def _apply_filters(df: pd.DataFrame, year_value, regions) -> pd.DataFrame:
     return df
 
 
+def _region_color_map(df: pd.DataFrame) -> dict[str, str]:
+    """
+    Produce a consistent colour map for regions across charts.
+
+    Notes
+    -----
+    - Uses a qualitative palette (Plotly Set2) for distinct, readable hues.
+    - Cycles the palette if there are more regions than colours.
+    """
+
+    reg_col = "regional_indicator"
+    if reg_col not in df.columns:
+        return {}
+
+    regions = sorted(pd.Series(df[reg_col]).dropna().unique().tolist())
+    palette = px.colors.qualitative.Safe
+    return {r: palette[i % len(palette)] for i, r in enumerate(regions)}
+
+
 # ----------------------------------------------------------------------
 # Data / Defaults
 # ----------------------------------------------------------------------
@@ -166,6 +185,9 @@ _NUMS = _numeric_cols(_BASE)
 _DEFAULT_YEAR = _default_year(_BASE) 
 
 _DEFAULT_METRIC = "ladder_score" if "ladder_score" in _NUMS else (_NUMS[0] if _NUMS else None)
+
+# Precompute region colour map once so the donut + bar share identical colours
+_REGION_CMAP = _region_color_map(_BASE)
 
 # ----------------------------------------------------------------------
 # Layout (modular: controls_col, charts_col, layout)
@@ -292,6 +314,7 @@ def _update_geo(year_value, region_values, metric):
     - All charts respect the current filters (Year, Region).
     - The donut encodes regional means of the selected metric.
     - Top-10 shows countries with the highest values for the metric.
+    - Region colours are kept consistent between the donut and the bar legend.
     """
 
     df = _apply_filters(_df(), year_value, region_values)
@@ -338,6 +361,9 @@ def _update_geo(year_value, region_values, metric):
                 values="value",
                 hole=0.55,
                 title=f"Regional Radial (mean {_labels(metric)})" + (f" · {int(year_value)}" if year_value else ""),
+                # --- Consistent region colours (same mapping as bar) ---
+                color=reg_col,
+                color_discrete_map=_REGION_CMAP,
             )
             radial.update_traces(textposition="outside", texttemplate="%{label}<br>%{value:.2f}")
             radial.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, showlegend=False)
@@ -367,6 +393,8 @@ def _update_geo(year_value, region_values, metric):
                     "country_name": "Country",        
                     "regional_indicator": "Region",   
                 },
+                # --- Consistent region colours (same mapping as donut) ---
+                color_discrete_map=_REGION_CMAP,
             )
             top10.update_layout(margin={"t": 70, "l": 10, "r": 10, "b": 10}, legend=dict(title="Region"))
     
