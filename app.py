@@ -108,4 +108,4 @@ if __name__ == "__main__":
 
     app = dashboard(enable_pages=True)
     print("🚀 Launching Dash dashboard at http://127.0.0.1:8050 ...")
-    app.run(debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=8050, debug=True, use_reloader=False)
