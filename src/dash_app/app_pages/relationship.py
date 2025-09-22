@@ -95,7 +95,7 @@ def _year_options(df: pd.DataFrame):
     if "year" not in df.columns:
         return []
     
-    years = sorted(pd.Series(df["year"]).dropna().unique().tolist()) if "year" in df.columns else []
+    years = sorted(pd.Series(df["year"]).dropna().unique().tolist(), reverse=True) if "year" in df.columns else []
     
     return [{"label": str(int(y)), "value": int(y)} for y in years]
 

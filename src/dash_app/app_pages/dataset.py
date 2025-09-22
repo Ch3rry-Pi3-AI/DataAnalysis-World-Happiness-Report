@@ -406,7 +406,7 @@ tables_col = html.Div(
     className="col-12 col-lg-9",
     children=[
         # Top: full-width main table
-        dcc.Graph(id="ds-main-table", style={"height": "300px"}, className="mb-3"),
+        dcc.Graph(id="ds-main-table", style={"height": "310px"}, className="mb-3"),
 
         # Second row: two summary tables side-by-side
         html.Div(
@@ -415,8 +415,8 @@ tables_col = html.Div(
                 html.Div(
                     className="col-12 col-xl-6",
                     children=[
-                        html.H6("Overall Summary", className="fw-bold mb-2"),
-                        dcc.Graph(id="ds-summary-overall", style={"height": "360px"}),
+                        html.H6("Overall Summary", className="fw-bold mb-3"),
+                        dcc.Graph(id="ds-summary-overall", style={"height": "350px"}),
                     ],
                 ),
                 html.Div(
