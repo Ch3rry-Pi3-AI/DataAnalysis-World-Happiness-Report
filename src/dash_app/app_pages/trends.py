@@ -148,7 +148,7 @@ def _region_color_map(df: pd.DataFrame) -> dict[str, str]:
         return {}
 
     regions = sorted(pd.Series(df[reg_col]).dropna().unique().tolist())
-    palette = px.colors.qualitative.Set2 
+    palette = px.colors.qualitative.Safe
     # Cycle if more regions than colours available
     cmap = {r: palette[i % len(palette)] for i, r in enumerate(regions)}
     return cmap
